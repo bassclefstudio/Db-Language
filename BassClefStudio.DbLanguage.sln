@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30320.27
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BassClefStudio.DbLanguage.Core", "BassClefStudio.DbLanguage.Core\BassClefStudio.DbLanguage.Core.csproj", "{1773EF94-B30E-46AC-B348-243D669F539F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1773EF94-B30E-46AC-B348-243D669F539F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1773EF94-B30E-46AC-B348-243D669F539F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1773EF94-B30E-46AC-B348-243D669F539F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1773EF94-B30E-46AC-B348-243D669F539F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0A492F58-71C6-4ACA-A7F8-C4EF688CCCF1}
+	EndGlobalSection
+EndGlobal
