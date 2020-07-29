@@ -29,7 +29,7 @@ namespace BassClefStudio.DbLanguage.Core.Data
         public DataType ParentType { get; }
 
         #endregion
-        #region Constructor
+        #region Initialize
 
         public DataType(Namespace typeName, IEnumerable<MemoryProperty> publicProperties, IEnumerable<MemoryProperty> privateProperties, IEnumerable<DataContract> contracts = null, DataType parentType = null)
         {

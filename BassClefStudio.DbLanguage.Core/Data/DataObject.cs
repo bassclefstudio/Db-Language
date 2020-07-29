@@ -18,7 +18,7 @@ namespace BassClefStudio.DbLanguage.Core.Data
         public DataType DataType { get; }
 
         #endregion
-        #region Constructor
+        #region Initialize
 
         /// <summary>
         /// Creates a new instance of a <see cref="DataObject"/> of a given <see cref="DataType"/>.
