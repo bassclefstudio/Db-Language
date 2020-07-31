@@ -53,12 +53,14 @@ namespace BassClefStudio.DbLanguage.Core.Scripts
             var thread = new Thread(
                 ScriptInfo.GetUniqueId(),
                 inheritedcapabilities,
-                new CommandPointer(Commands.ToArray()));
+                new ThreadPointer(Commands.ToArray()),
+                null);
+            //// TODO: Add context
 
             IWritableMemoryGroup inputMemory = ScriptInfo.CreateMemoryFromInputs(inputs.ToArray());
             await thread.RunThreadAsync(ParentObject, inputMemory);
 
-            ////TODO: Make sure that this is the correct way to get the output of a script; handle flags such as no return and exception.
+            //// TODO: Make sure that this is the correct way to get the output of a script; handle flags such as no return and exception.
             return inputMemory.Get("return").Value;
         }
     }

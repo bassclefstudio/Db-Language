@@ -43,25 +43,10 @@ namespace BassClefStudio.DbLanguage.Core.Data
         /// </summary>
         public IMemoryGroup PrivateProperties { get; private set; }
 
-        private IMemoryStack memoryStack;
         /// <summary>
-        /// Gets the current <see cref="IMemoryStack"/> representing all objects available to the current <see cref="DataObject"/>, including <see cref="PublicProperties"/> and <see cref="PrivateProperties"/>.
+        /// Gets the current <see cref="IMemoryStack"/> representing all memory available to the current <see cref="DataObject"/>, including <see cref="PublicProperties"/> and <see cref="PrivateProperties"/>.
         /// </summary>
-        public IMemoryStack MemoryStack
-        {
-            get
-            {
-                if(memoryStack == null)
-                {
-                    memoryStack = new MemoryStack();
-                    //// TODO: Add some sort of context here.
-                    // memoryStack.Push(context);
-                    memoryStack.Push(PublicProperties);
-                    memoryStack.Push(PrivateProperties);
-                }
-                return memoryStack;
-            }
-        }
+        public IMemoryStack MemoryStack { get; private set; }
 
         /// <summary>
         /// Builds the <see cref="IMemoryGroup"/>s for private and public properties as specified in the <see cref="DataType"/>.
@@ -70,6 +55,10 @@ namespace BassClefStudio.DbLanguage.Core.Data
         {
             PublicProperties = new MemoryGroup(DataType.PublicProperties);
             PrivateProperties = new MemoryGroup(DataType.PrivateProperties);
+
+            MemoryStack = new MemoryStack();
+            MemoryStack.Push(PublicProperties);
+            MemoryStack.Push(PrivateProperties);
 
             //// TODO: Run the constructor to initialize property values...
         }
