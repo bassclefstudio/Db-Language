@@ -70,14 +70,14 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Threading
 
             while (!Pointer.IsStopped)
             {
-                if (Capabilities.CanAccess(Pointer.CurrentCommand.Requiredcapabilities))
+                if (Capabilities.CanAccess(Pointer.CurrentCommand.RequiredCapabilities))
                 {
                     await Pointer.CurrentCommand.ExecuteCommandAsync(me, MemoryStack, Capabilities);
                     Pointer.Next();
                 }
                 else
                 {
-                    throw new CapabilityException($"Thread does not have the required capabilities to execute command. capabilities required:\r\n{string.Join(", ", Pointer.CurrentCommand.Requiredcapabilities.RequiredCapabilities.Select(p => p.ToString()))}");
+                    throw new CapabilityException($"Thread does not have the required capabilities to execute command. capabilities required:\r\n{string.Join(", ", Pointer.CurrentCommand.RequiredCapabilities.RequiredCapabilities.Select(p => p.ToString()))}");
                 }
             }
         }

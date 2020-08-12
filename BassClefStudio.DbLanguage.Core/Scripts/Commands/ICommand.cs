@@ -17,7 +17,7 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
         /// <summary>
         /// A <see cref="CapabilitiesCollection"/> which contains all of the reuqired <see cref="Capability"/> objects a <see cref="Thread"/>'s <see cref="CapabilitiesCollection"/> object must have in order to run the command.
         /// </summary>
-        CapabilitiesCollection Requiredcapabilities { get; }
+        CapabilitiesCollection RequiredCapabilities { get; }
     }
 
     public interface IActionCommand : ICommand

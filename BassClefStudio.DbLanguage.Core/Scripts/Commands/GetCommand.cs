@@ -15,7 +15,7 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
     public class GetCommand : IActionCommand
     {
         /// <inheritdoc/>
-        public CapabilitiesCollection Requiredcapabilities { get; }
+        public CapabilitiesCollection RequiredCapabilities { get; }
 
         /// <summary>
         /// The path to the <see cref="DataObject"/> to be retrieved from memory.
@@ -29,7 +29,7 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
         public GetCommand(string path)
         {
             VarPath = path;
-            Requiredcapabilities = new CapabilitiesCollection();
+            RequiredCapabilities = new CapabilitiesCollection();
         }
 
         /// <inheritdoc/>

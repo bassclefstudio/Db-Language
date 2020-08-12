@@ -15,7 +15,7 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
     public class SetCommand : IAsyncCommand
     {
         /// <inheritdoc/>
-        public CapabilitiesCollection Requiredcapabilities { get; }
+        public CapabilitiesCollection RequiredCapabilities { get; }
 
         /// <summary>
         /// The path to the <see cref="DataObject"/> to be retrieved from memory.
@@ -36,7 +36,7 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
         {
             VarPath = path;
             Value = value;
-            Requiredcapabilities = new CapabilitiesCollection();
+            RequiredCapabilities = new CapabilitiesCollection();
         }
 
         /// <inheritdoc/>

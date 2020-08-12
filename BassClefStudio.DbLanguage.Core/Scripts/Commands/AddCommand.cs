@@ -15,7 +15,7 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
     public class AddCommand : IActionCommand
     {
         /// <inheritdoc/>
-        public CapabilitiesCollection Requiredcapabilities { get; }
+        public CapabilitiesCollection RequiredCapabilities { get; }
 
         /// <summary>
         /// The name of the variable to be created in memory.
@@ -36,7 +36,7 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
         {
             VarName = name;
             VarType = varType;
-            Requiredcapabilities = new CapabilitiesCollection();
+            RequiredCapabilities = new CapabilitiesCollection();
         }
 
         /// <inheritdoc/>

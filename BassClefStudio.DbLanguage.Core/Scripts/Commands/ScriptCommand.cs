@@ -12,7 +12,7 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
     public class ScriptCommand : IAsyncCommand
     {
         /// <inheritdoc/>
-        public CapabilitiesCollection Requiredcapabilities { get; }
+        public CapabilitiesCollection RequiredCapabilities { get; }
 
         public ICommand GetScriptCommand { get; }
         public IEnumerable<ICommand> GetInputCommands { get; }
@@ -28,7 +28,7 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
         {
             GetScriptCommand = getScript;
             GetInputCommands = getInputs;
-            Requiredcapabilities = new CapabilitiesCollection();
+            RequiredCapabilities = new CapabilitiesCollection();
         }
 
         /// <inheritdoc/>
