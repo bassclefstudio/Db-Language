@@ -40,7 +40,6 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
         Task<DataObject> Execute(DataObject me, Thread thread);
     }
 
-
     public class CommandException : Exception
     {
         public CommandException() { }
