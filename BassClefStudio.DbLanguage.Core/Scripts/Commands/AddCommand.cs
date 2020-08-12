@@ -12,7 +12,7 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
     /// <summary>
     /// Represents a memory ADD command that adds a new item to the <see cref="IWritableMemoryStack"/>.
     /// </summary>
-    public class AddCommand : IActionCommand
+    public class AddCommand : ICommand
     {
         /// <inheritdoc/>
         public CapabilitiesCollection RequiredCapabilities { get; }
@@ -40,9 +40,9 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
         }
 
         /// <inheritdoc/>
-        public DataObject Execute(DataObject me, IWritableMemoryStack myStack, CapabilitiesCollection capabilities)
+        public async Task<DataObject> ExecuteCommandAsync(DataObject me, Thread thread)
         {
-            myStack.Add(new MemoryItem(new MemoryProperty(VarName, VarType)));
+            thread.MemoryStack.Add(new MemoryItem(new MemoryProperty(VarName, VarType)));
             return null;
         }
     }

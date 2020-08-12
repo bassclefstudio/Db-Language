@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
 {
-    public class ScriptCommand : IAsyncCommand
+    public class ScriptCommand : ICommand
     {
         /// <inheritdoc/>
         public CapabilitiesCollection RequiredCapabilities { get; }
@@ -32,17 +32,17 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
         }
 
         /// <inheritdoc/>
-        public async Task<DataObject> Execute(DataObject me, IWritableMemoryStack myStack, CapabilitiesCollection capabilities)
+        public async Task<DataObject> ExecuteCommandAsync(DataObject me, Thread thread)
         {
             ////Gets the script (likely from memory).
-            DataObject owningObject = await GetScriptCommand.ExecuteCommandAsync(me, myStack, capabilities);
+            DataObject owningObject = await GetScriptCommand.ExecuteCommandAsync(me, thread);
             Script script = owningObject.GetObject<Script>();
 
             ////Resolves all inputs asynchronously and in parallel, often calling other scripts or getting values from memory (because scripts can be layered and asynchronous, the inputs are asynchronous).
             List<Task<DataObject>> inputTasks = new List<Task<DataObject>>();
             foreach (var getInput in GetInputCommands)
             {
-                inputTasks.Add(getInput.ExecuteCommandAsync(me, myStack, capabilities));
+                inputTasks.Add(getInput.ExecuteCommandAsync(me, thread));
             }
 
             List<DataObject> inputs = new List<DataObject>();
@@ -51,7 +51,7 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
                 inputs.Add(await task);
             }
 
-            return await script.CallScript(inputs, capabilities);
+            return await script.CallScript(inputs, thread.Capabilities);
         }
     }
 }

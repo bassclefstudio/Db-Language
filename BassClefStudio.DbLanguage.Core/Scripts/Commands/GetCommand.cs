@@ -12,7 +12,7 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
     /// <summary>
     /// Represents a memory GET command that returns value from the <see cref="IWritableMemoryStack"/>.
     /// </summary>
-    public class GetCommand : IActionCommand
+    public class GetCommand : ICommand
     {
         /// <inheritdoc/>
         public CapabilitiesCollection RequiredCapabilities { get; }
@@ -33,11 +33,9 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
         }
 
         /// <inheritdoc/>
-        public DataObject Execute(DataObject me, IWritableMemoryStack myStack, CapabilitiesCollection capabilities)
+        public async Task<DataObject> ExecuteCommandAsync(DataObject me, Thread thread)
         {
-            //// TODO: Come back and fix this!!
-            ////return myStack.GetPath(VarPath).Value;
-            throw new NotImplementedException();
+            return thread.MemoryStack.GetPath(VarPath).Value;
         }
     }
 }

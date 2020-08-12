@@ -12,7 +12,7 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
     /// <summary>
     /// Represents a memory SET command that writes a value to the <see cref="IWritableMemoryStack"/>.
     /// </summary>
-    public class SetCommand : IAsyncCommand
+    public class SetCommand : ICommand
     {
         /// <inheritdoc/>
         public CapabilitiesCollection RequiredCapabilities { get; }
@@ -40,7 +40,7 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
         }
 
         /// <inheritdoc/>
-        public async Task<DataObject> Execute(DataObject me, IWritableMemoryStack myStack, CapabilitiesCollection capabilities)
+        public async Task<DataObject> ExecuteCommandAsync(DataObject me, Thread thread)
         {
             //// TODO: Come back and fix this!!
             //myStack.SetPath(VarPath, await Value());
