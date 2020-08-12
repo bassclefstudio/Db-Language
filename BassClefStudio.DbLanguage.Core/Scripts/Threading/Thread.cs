@@ -72,7 +72,7 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Threading
             {
                 if (Capabilities.CanAccess(Pointer.CurrentCommand.RequiredCapabilities))
                 {
-                    await Pointer.CurrentCommand.ExecuteCommandAsync(me, MemoryStack, Capabilities);
+                    await Pointer.CurrentCommand.ExecuteCommandAsync(me, this);
                     Pointer.Next();
                 }
                 else

@@ -25,10 +25,9 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
         /// <summary>
         /// Executes the command.
         /// </summary>
-        /// <param name="myStack">The stack of memory available to the command, including the ability to create script memory in the topmost layer.</param>
-        /// <param name="pointer">The pointer that controls movement to each <see cref="ICommand"/>, This allows for a <see cref="ICommand"/> to change at runtime which <see cref="ICommand"/> follows it. This parameter should only be included when the command is being run by a <see cref="Thread"/>.</param>
-        /// <param name="capabilities">The capabilities of the thread that called the <see cref="ICommand"/> - a script cannot declare more capabilities than what the calling object passes to it.</param>
-        DataObject Execute(DataObject me, IWritableMemoryStack myStack, CapabilitiesCollection capabilities);
+        /// <param name="me">The owning <see cref="DataObject"/> making the call to the <see cref="ICommand"/>.</param>
+        /// <param name="thread">The owning <see cref="Thread"/> object, which manages the memory and <see cref="CapabilitiesCollection"/> for the <see cref="ICommand"/>.</param>
+        DataObject Execute(DataObject me, Thread thread);
     }
 
     public interface IAsyncCommand : ICommand
@@ -36,10 +35,9 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
         /// <summary>
         /// Executes the command asynchronously.
         /// </summary>
-        /// <param name="myStack">The stack of memory available to the command, including the ability to create script memory in the topmost layer.</param>
-        /// <param name="pointer">The pointer that controls movement to each <see cref="ICommand"/>, This allows for a <see cref="ICommand"/> to change at runtime which <see cref="ICommand"/> follows it. This parameter should only be included when the command is being run by a <see cref="Thread"/>.</param>
-        /// <param name="capabilities">The capabilities of the thread that called the <see cref="ICommand"/> - a script cannot declare more capabilities than what the calling object passes to it.</param>
-        Task<DataObject> Execute(DataObject me, IWritableMemoryStack myStack, CapabilitiesCollection capabilities);
+        /// <param name="me">The owning <see cref="DataObject"/> making the call to the <see cref="ICommand"/>.</param>
+        /// <param name="thread">The owning <see cref="Thread"/> object, which manages the memory and <see cref="CapabilitiesCollection"/> for the <see cref="ICommand"/>.</param>
+        Task<DataObject> Execute(DataObject me, Thread thread);
     }
 
 
@@ -55,15 +53,20 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
     /// </summary>
     public static class CommandExtensions
     {
-        public static async Task<DataObject> ExecuteCommandAsync(this ICommand command, DataObject me, IWritableMemoryStack myStack, CapabilitiesCollection capabilities)
+        /// <summary>
+        /// Executes an <see cref="ICommand"/> asynchronously.
+        /// </summary>
+        /// <param name="me">The owning <see cref="DataObject"/> making the call to the <see cref="ICommand"/>.</param>
+        /// <param name="thread">The owning <see cref="Thread"/> object, which manages the memory and <see cref="CapabilitiesCollection"/> for the <see cref="ICommand"/>.</param>
+        public static async Task<DataObject> ExecuteCommandAsync(this ICommand command, DataObject me, Thread thread)
         {
             if (command is IActionCommand actionCommand)
             {
-                return actionCommand.Execute(me, myStack, capabilities);
+                return actionCommand.Execute(me, thread);
             }
             else if (command is IAsyncCommand asyncCommand)
             {
-                return await asyncCommand.Execute(me, myStack, capabilities);
+                return await asyncCommand.Execute(me, thread);
             }
             else
             {
