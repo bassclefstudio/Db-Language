@@ -41,7 +41,7 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Threading
         public IWritableMemoryStack MemoryStack { get; private set; }
 
         /// <summary>
-        /// Creates a new thread with a name and <see cref="Scripts.capabilityCollection"/>.
+        /// Creates a new <see cref="Thread"/>
         /// </summary>
         /// <param name="name">The name of the thread.</param>
         /// <param name="capabilities">A collection of capabilities that the <see cref="Thread"/> has to run certain <see cref="ICommand"/> commands.</param>
@@ -54,7 +54,21 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Threading
             Pointer = pointer;
             Context = context;
         }
-        
+
+        /// <summary>
+        /// Creates a new thread as a child of another <see cref="Thread"/>. 
+        /// </summary>
+        /// <param name="name">The (optional) name of the thread. Defaults to the name of the parent "<see cref="Thread.Name"/>_{#}"</param>
+        /// <param name="pointer">The <see cref="ThreadPointer"/> contains information about the <see cref="ICommand"/>s that will be run on the <see cref="Thread"/>.</param>
+        /// <param name="parent">The parent <see cref="Thread"/> to create this <see cref="Thread"/> instance from. The <see cref="Thread.Context"/>, <see cref="Thread.Capabilities"/>, and other related data will be copied from the parent.</param>
+        public Thread(Thread parent, ThreadPointer pointer, string name = null)
+        {
+            Name = name ?? $"{parent.Name}_{Guid.NewGuid()}";
+            Capabilities = parent.Capabilities;
+            Pointer = pointer;
+            Context = parent.Context;
+        }
+
         /// <summary>
         /// Starts the execution of a thread at a specific <see cref="ICommand"/> with a memory context in the form of an <see cref="IMemoryStack"/> and an input <see cref="IWritableMemoryGroup"/>.
         /// </summary>
