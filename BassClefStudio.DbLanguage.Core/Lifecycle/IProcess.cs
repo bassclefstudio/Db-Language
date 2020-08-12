@@ -10,7 +10,5 @@ namespace BassClefStudio.DbLanguage.Core.Lifecycle
     public interface IProcess
     {
         ILibrary ExecutingLibrary { get; }
-
-        IEnumerable<ILibrary> DependentLibraries { get; }
     }
 }

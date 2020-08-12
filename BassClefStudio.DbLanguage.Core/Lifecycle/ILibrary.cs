@@ -11,6 +11,8 @@ namespace BassClefStudio.DbLanguage.Core.Lifecycle
     /// </summary>
     public interface ILibrary
     {
+        IEnumerable<ILibrary> DependentLibraries { get; }
+
         IEnumerable<IType> Definitions { get; }
 
         IMemoryGroup ManagedContext { get; }
