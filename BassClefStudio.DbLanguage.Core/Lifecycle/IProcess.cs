@@ -9,6 +9,9 @@ namespace BassClefStudio.DbLanguage.Core.Lifecycle
     /// </summary>
     public interface IProcess
     {
+        /// <summary>
+        /// The main <see cref="ILibrary"/> which the <see cref="IProcess"/> can use to start and end an <see cref="IProcess"/>.
+        /// </summary>
         ILibrary ExecutingLibrary { get; }
     }
 }
