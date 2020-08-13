@@ -6,7 +6,7 @@ using System.Text;
 namespace BassClefStudio.DbLanguage.Core.Documentation
 {
     /// <summary>
-    /// Represents a full name of a type or value, split into sections. This includes the full namespace and the path inside of that namespace. Provides methods for resolving namespaces.
+    /// Represents a full name of a type or value, split into sections. This can include a full namespace and the path inside of that namespace. Provides methods for resolving namespaces.
     /// </summary>
     public class Namespace
     {
