@@ -43,7 +43,7 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
         public async Task<DataObject> ExecuteCommandAsync(DataObject me, Thread thread)
         {
             //// TODO: Come back and fix this!!
-            //myStack.SetPath(VarPath, await Value());
+            thread.MemoryStack.SetPath(VarPath, await Value());
             return null;
         }
     }
