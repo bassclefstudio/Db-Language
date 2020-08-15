@@ -67,5 +67,15 @@ namespace BassClefStudio.DbLanguage.Core.Documentation
         {
             return $"{{{string.Join(".", NameParts)}}}";
         }
+
+        public static implicit operator string(Namespace n)
+        {
+            return n.ToString();
+        }
+
+        public static implicit operator Namespace(string s)
+        {
+            return new Namespace(s);
+        }
     }
 }
