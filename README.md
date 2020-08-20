@@ -1,6 +1,6 @@
 This project is in **EARLY DEVELOPMENT** and the goal of the project is far from being realized!
 
-# BassClefStudio.DbLanguage
+# Db-Language
 ![](https://github.com/bassclefstudio/Db-Language/workflows/.NET%20Core%20Build,%20Test,%20and%20Pack/badge.svg)
 ![](https://github.com/bassclefstudio/Db-Language/workflows/.NET%20Core%20Build%20and%20Test/badge.svg)
 
