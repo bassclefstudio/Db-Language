@@ -46,9 +46,8 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Threading
         {
             get
             {
-                return Flags.HasFlag(CommandPointerFlags.Complete) 
-                    || Flags.HasFlag(CommandPointerFlags.Returned)
-                    || Flags.HasFlag(CommandPointerFlags.Exception);
+                return Flags.HasFlag(CommandPointerFlags.Complete)
+                    || Flags.HasFlag(CommandPointerFlags.Returned);
             }
         }
 
@@ -100,11 +99,6 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Threading
         /// <summary>
         /// Indicates that a value was returned from an <see cref="ICommand"/> in the <see cref="ThreadPointer.Commands"/> collection.
         /// </summary>
-        Returned = 2,
-
-        /// <summary>
-        /// Indicates that an <see cref="ICommand"/> failed and threw an exception that forced the termination of the <see cref="Thread"/>.
-        /// </summary>
-        Exception = 4
+        Returned = 2
     }
 }

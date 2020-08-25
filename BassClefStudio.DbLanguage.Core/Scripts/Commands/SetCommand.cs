@@ -23,16 +23,16 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
         public string VarPath { get; }
 
         /// <summary>
-        /// The <see cref="DataObject"/> value to set the item in memory. Must match the <see cref="MemoryItem.Type"/>
+        /// The <see cref="ICommand"/> value which retreives the value to set the item in memory. Must match the <see cref="MemoryItem.Type"/>
         /// </summary>
-        public Func<Task<DataObject>> Value { get; }
+        public ICommand Value { get; }
 
         /// <summary>
         /// Creates a new memory SET command that sets the <see cref="MemoryItem.Value"/> of an item in memory.
         /// </summary>
         /// <param name="path">The path to the <see cref="MemoryItem"/>.</param>
-        /// <param name="value">The <see cref="DataObject"/> value to set.</param>
-        public SetCommand(string path, Func<Task<DataObject>> value)
+        /// <param name="value">The <see cref="ICommand"/> value which retreives the value to set.</param>
+        public SetCommand(string path, ICommand value)
         {
             VarPath = path;
             Value = value;
@@ -42,8 +42,7 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
         /// <inheritdoc/>
         public async Task<DataObject> ExecuteCommandAsync(DataObject me, Thread thread)
         {
-            //// TODO: Come back and fix this!!
-            thread.MemoryStack.SetPath(VarPath, await Value());
+            thread.MemoryStack.SetPath(VarPath, await Value.ExecuteCommandAsync(me, thread));
             return null;
         }
     }

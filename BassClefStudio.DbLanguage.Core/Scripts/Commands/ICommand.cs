@@ -27,10 +27,17 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
         Task<DataObject> ExecuteCommandAsync(DataObject me, Thread thread);
     }
 
+    /// <summary>
+    /// Represents an <see cref="Exception"/> thrown from within the Db language, by an <see cref="ICommand"/>.
+    /// </summary>
     public class CommandException : Exception
     {
-        public CommandException() { }
-        public CommandException(string message) : base(message) { }
-        public CommandException(string message, Exception inner) : base(message, inner) { }
+        /// <summary>
+        /// The Db <see cref="DataObject"/> provided as the exception information object.
+        /// </summary>
+        public DataObject ExceptionObject { get; }
+
+        public CommandException(string message, DataObject exceptionObject  = null) : base(message) => ExceptionObject = exceptionObject;
+        public CommandException(string message, Exception innerException, DataObject exceptionObject = null) : base(message, innerException) => ExceptionObject = exceptionObject;
     }
 }
