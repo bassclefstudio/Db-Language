@@ -31,8 +31,8 @@ namespace BassClefStudio.DbLanguage.Core.Memory
         /// <summary>
         /// Creates a new property, given the 
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="type"></param>
+        /// <param name="key">The unique key for the property.</param>
+        /// <param name="type">The <see cref="IType"/> of data stored in the property.</param>
         /// <param name="flags">Optionally, a new property can specify specific flags to be set that control how the memory can be accessed. For more information, see <seealso cref="PropertyFlags"/>.</param>
         public MemoryProperty(string key, IType type, PropertyFlags flags = DefaultFlags)
         {

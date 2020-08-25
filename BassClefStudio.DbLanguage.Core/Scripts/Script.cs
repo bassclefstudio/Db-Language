@@ -61,7 +61,14 @@ namespace BassClefStudio.DbLanguage.Core.Scripts
             await thread.RunThreadAsync(ParentObject, inputMemory);
 
             //// TODO: Make sure that this is the correct way to get the output of a script; handle flags such as no return and exception.
-            return inputMemory.Get("return").Value;
+            if (thread.Pointer.Flags.HasFlag(CommandPointerFlags.Returned))
+            {
+                return inputMemory.Get("return").Value;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }
