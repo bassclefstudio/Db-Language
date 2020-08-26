@@ -94,6 +94,7 @@ namespace BassClefStudio.DbLanguage.Parser
             Variable = Path.Select<ICommand>(p => new GetCommand(p));
             PathGet =
                 from c in Rec(() => Command)
+                from dot in Dot
                 from p in Path
                 select new GetOfCommand(c, p) as ICommand;
             Method =
@@ -105,7 +106,6 @@ namespace BassClefStudio.DbLanguage.Parser
         }
 
         #endregion
-
         #endregion
         #region Properties
         private Parser<char, StringChild> Property;
