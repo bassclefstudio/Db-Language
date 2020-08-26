@@ -23,7 +23,7 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
         public string VarPath { get; }
 
         /// <summary>
-        /// Creates a new memory GET command that gets a <see cref="DataObject"/> from a specified path memory.
+        /// Creates a new memory GET command that gets a <see cref="DataObject"/> from a specified path in memory.
         /// </summary>
         /// <param name="path">The path to the <see cref="MemoryItem"/>.</param>
         public GetCommand(string path)

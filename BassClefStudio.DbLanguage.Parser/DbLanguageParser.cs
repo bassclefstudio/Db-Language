@@ -1,7 +1,9 @@
-﻿using Pidgin;
+﻿using BassClefStudio.DbLanguage.Core.Scripts.Commands;
+using Pidgin;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Xml.Schema;
 using static Pidgin.Parser;
 using static Pidgin.Parser<char>;
 
@@ -20,8 +22,10 @@ namespace BassClefStudio.DbLanguage.Parser
         private readonly Parser<char, char> OpenParenthesis = Char('(');
         private readonly Parser<char, char> CloseParenthesis = Char(')');
         private readonly Parser<char, char> Dot = Char('.');
+        private readonly Parser<char, char> Comma = Char(',');
         private readonly Parser<char, char> Quote = Char('"');
         private readonly Parser<char, char> Colon = Char(':');
+        private readonly Parser<char, char> SemiColon = Char(';');
         #endregion
         #region Keywords
         private readonly Parser<char, string> Comment = String("//");
@@ -34,19 +38,23 @@ namespace BassClefStudio.DbLanguage.Parser
         private Parser<char, string> String;
         private Parser<char, string> Path;
         private Parser<char, string> Name;
-        private Parser<char, char> Block;
-
-        private Parser<char, T> InBlock<T, U, V>(Parser<char, U> header, Parser<char, V> body, Func<U, V, T> func)
+        
+        private Parser<char, T> Block<T>(Parser<char, T> inner)
         {
-            return Map((h, b) => func(h, b), header, Block.Then(body));
+            return inner.Between(OpenBrace.Between(SkipWhitespaces), CloseBrace.Between(SkipWhitespaces));
         }
 
         private void InitStructures()
         {
-            Path = Map((a, b) => string.Concat(a, b), Letter, LetterOrDigit.Or(Dot).ManyString());
-            Name = Map((a, b) => string.Concat(a, b), Letter, LetterOrDigit.ManyString());
+            Path =
+                from a in Letter
+                from b in LetterOrDigit.Or(Dot).ManyString()
+                select string.Concat(a, b);
+            Name =
+                from a in Letter
+                from b in LetterOrDigit.ManyString()
+                select string.Concat(a, b);
             String = AnyCharExcept('"').ManyString().Between(Quote);
-            Block = Any.Between(OpenBrace.Between(SkipWhitespaces), CloseBrace.Between(SkipWhitespaces));
         }
 
         #endregion
@@ -54,42 +62,85 @@ namespace BassClefStudio.DbLanguage.Parser
         #region Language
         #region Scripts
 
+        private Parser<char, StringChild> Script;
+        private Parser<char, StringInput> Input;
+
         private void InitScripts()
         {
+            Input =
+                from t in Path.Before(Whitespace.AtLeastOnce())
+                from n in Name
+                select new StringInput() { Type = t, Name = n };
 
+            Script =
+                from v in OneOf(Try(Public.ThenReturn(true)), Try(Private.ThenReturn(false))).Before(Whitespace.AtLeastOnce()).Optional()
+                from t in Path.Before(Whitespace.AtLeastOnce())
+                from n in Name.Before(SkipWhitespaces)
+                from i in Input.Separated(SkipWhitespaces).Between(OpenParenthesis, CloseParenthesis)
+                from cs in Block(Commands)
+                select new StringScript() { IsPublic = v.GetValueOrDefault(false), ReturnType = t, Name = n, Inputs = i, Commands = cs } as StringChild;
+        }
+
+        #region Code
+
+        private Parser<char, IEnumerable<ICommand>> Commands;
+        private Parser<char, ICommand> Variable;
+        private Parser<char, ICommand> PathGet;
+        private Parser<char, ICommand> Method;
+        private Parser<char, ICommand> Command;
+
+        private void InitCode()
+        {
+            Variable = Path.Select<ICommand>(p => new GetCommand(p));
+            PathGet =
+                from c in Rec(() => Command)
+                from p in Path
+                select new GetOfCommand(c, p) as ICommand;
+            Method =
+                from s in Rec(() => Command)
+                from i in Rec(() => Command).Separated(Comma.Between(SkipWhitespaces)).Between(OpenParenthesis, CloseParenthesis)
+                select new ScriptCommand(s, i) as ICommand;
+            Command = OneOf(Try(PathGet), Try(Method), Variable);
+            Commands = Method.Separated(SemiColon.Then(SkipWhitespaces));
         }
 
         #endregion
+
+        #endregion
         #region Properties
-        private Parser<char, StringProperty> Property;
+        private Parser<char, StringChild> Property;
 
         private void InitProperties()
         {
-            // TODO: Initial value / script?
+            // TODO: Initial value?
             Property =
-                from v in OneOf(Try(Public.ThenReturn(true)), Try(Private.ThenReturn(false))).Optional().Between(SkipWhitespaces)
-                from t in Path.Between(SkipWhitespaces)
-                from n in Name
-                select new StringProperty() { IsPublic = v.GetValueOrDefault(false), Type = t, Name = n };
+                from v in OneOf(Try(Public.ThenReturn(true)), Try(Private.ThenReturn(false))).Before(Whitespace.AtLeastOnce()).Optional()
+                from t in Path.Before(Whitespace.AtLeastOnce())
+                from n in Name.Before(SemiColon)
+                select new StringProperty() { IsPublic = v.GetValueOrDefault(false), Type = t, Name = n } as StringChild;
         }
 
         #endregion
         #region Core
 
-        private Parser<char, StringHeader> Header;
-        private Parser<char, IEnumerable<StringProperty>> Body;
+        private Parser<char, StringTypeHeader> Header;
+        private Parser<char, IEnumerable<StringChild>> Body;
         private Parser<char, StringType> Class;
 
         private void InitLanguage()
         {
             Header =
-                from t in OneOf(Try(Type.ThenReturn(true)), Contract.ThenReturn(false)).Between(SkipWhitespaces)
+                from t in OneOf(Try(Type.ThenReturn(true)), Contract.ThenReturn(false)).Before(Whitespace.AtLeastOnce())
                 from n in Name
-                from d in Colon.Between(SkipWhitespaces).Then(Path.Many()).Optional()
-                select new StringHeader() { Name = n, IsContract = t, Dependencies = d.GetValueOrDefault(new string[0]) };
-            // TODO: Parse Body
-            Body = null;
-            Class = InBlock(Header, Body, (h, b) => new StringType() { Header = h, Properties = b });
+                from d in Whitespace.AtLeastOnce().Then(Colon.Between(SkipWhitespaces).Then(Path.Separated(Comma.Between(SkipWhitespaces)))).Optional()
+                select new StringTypeHeader() { Name = n, IsContract = t, Dependencies = d.GetValueOrDefault(new string[0]) };
+            
+            Body = OneOf(Try(Property), Script).Separated(SkipWhitespaces);
+
+            Class =
+                from h in Header
+                from b in Block(Body)
+                select new StringType() { Header = h, Properties = b };
         }
 
         #endregion
@@ -98,6 +149,7 @@ namespace BassClefStudio.DbLanguage.Parser
         public DbLanguageParser()
         {
             InitStructures();
+            InitCode();
             InitScripts();
             InitProperties();
             InitLanguage();
