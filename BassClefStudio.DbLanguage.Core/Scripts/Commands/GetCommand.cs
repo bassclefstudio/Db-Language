@@ -35,7 +35,6 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
         /// <inheritdoc/>
         public async Task<DataObject> ExecuteCommandAsync(DataObject me, Thread thread)
         {
-            // TODO: What happens if 'me' is where you want to retreive data from?
             return thread.MemoryStack.GetPath(VarPath).Value;
         }
     }

@@ -79,6 +79,7 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Threading
             ////Initializes memory.
             MemoryStack = new MemoryStack();
             MemoryStack.Push(Context);
+            MemoryStack.Push(me.MemoryStack);
             MemoryStack.Push(inputs);
             MemoryStack.Push();
 
