@@ -34,6 +34,7 @@ namespace BassClefStudio.DbLanguage.Parser
         private readonly Parser<char, string> Public = String("public");
         private readonly Parser<char, string> Type = String("type");
         private readonly Parser<char, string> Contract = String("contract");
+        private readonly Parser<char, string> Var = String("var");
         #endregion
         #region Structures
         private Parser<char, string> String;
@@ -88,6 +89,7 @@ namespace BassClefStudio.DbLanguage.Parser
         private Parser<char, ICommand> Method;
         private Parser<char, ICommand> GetVariable;
         private Parser<char, ICommand> SetVariable;
+        private Parser<char, ICommand> AddVariable;
         private Parser<char, ICommand> Statement;
         private Parser<char, ICommand> Value;
         private Parser<char, IEnumerable<ICommand>> Statements;
@@ -100,6 +102,12 @@ namespace BassClefStudio.DbLanguage.Parser
                 from v in GetVariable
                 from i in MethodInputs
                 select new ScriptCommand(v, i) as ICommand;
+            
+            //AddVariable = 
+            //    from t in Path
+            //    from n in Name
+            //    select t == null ?  : new AddCommand(n, t)
+
             SetVariable =
                 from p in Path
                 from eq in Equal.Between(SkipWhitespaces)
