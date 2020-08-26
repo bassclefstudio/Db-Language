@@ -26,6 +26,7 @@ namespace BassClefStudio.DbLanguage.Parser
         private readonly Parser<char, char> Quote = Char('"');
         private readonly Parser<char, char> Colon = Char(':');
         private readonly Parser<char, char> SemiColon = Char(';');
+        private readonly Parser<char, char> Equal = Char('=');
         #endregion
         #region Keywords
         private readonly Parser<char, string> Comment = String("//");
@@ -76,33 +77,37 @@ namespace BassClefStudio.DbLanguage.Parser
                 from v in OneOf(Try(Public.ThenReturn(true)), Try(Private.ThenReturn(false))).Before(Whitespace.AtLeastOnce()).Optional()
                 from t in Path.Before(Whitespace.AtLeastOnce())
                 from n in Name.Before(SkipWhitespaces)
-                from i in Input.Separated(SkipWhitespaces).Between(OpenParenthesis, CloseParenthesis)
-                from cs in Block(Commands)
+                from i in Input.Separated(Comma.Between(SkipWhitespaces)).Between(OpenParenthesis, CloseParenthesis)
+                from cs in Block(SkipWhitespaces.Then(Statements))
                 select new StringScript() { IsPublic = v.GetValueOrDefault(false), ReturnType = t, Name = n, Inputs = i, Commands = cs } as StringChild;
         }
 
         #region Code
 
-        private Parser<char, IEnumerable<ICommand>> Commands;
-        private Parser<char, ICommand> Variable;
-        private Parser<char, ICommand> PathGet;
+        private Parser<char, IEnumerable<ICommand>> MethodInputs;
         private Parser<char, ICommand> Method;
-        private Parser<char, ICommand> Command;
+        private Parser<char, ICommand> GetVariable;
+        private Parser<char, ICommand> SetVariable;
+        private Parser<char, ICommand> Statement;
+        private Parser<char, ICommand> Value;
+        private Parser<char, IEnumerable<ICommand>> Statements;
 
         private void InitCode()
         {
-            Variable = Path.Select<ICommand>(p => new GetCommand(p));
-            PathGet =
-                from c in Rec(() => Command)
-                from dot in Dot
-                from p in Path
-                select new GetOfCommand(c, p) as ICommand;
+            MethodInputs = Rec(() => Value).Separated(Comma.Then(SkipWhitespaces)).Between(OpenParenthesis, CloseParenthesis);
+            GetVariable = Path.Select<ICommand>(p => new GetCommand(p));
             Method =
-                from s in Rec(() => Command)
-                from i in Rec(() => Command).Separated(Comma.Between(SkipWhitespaces)).Between(OpenParenthesis, CloseParenthesis)
-                select new ScriptCommand(s, i) as ICommand;
-            Command = OneOf(Try(PathGet), Try(Method), Variable);
-            Commands = Method.Separated(SemiColon.Then(SkipWhitespaces));
+                from v in GetVariable
+                from i in MethodInputs
+                select new ScriptCommand(v, i) as ICommand;
+            SetVariable =
+                from p in Path
+                from eq in Equal.Between(SkipWhitespaces)
+                from v in Rec(() => Value)
+                select new SetCommand(p, v) as ICommand;
+            Value = Try(Method).Or(GetVariable);
+            Statement = Try(Method).Or(SetVariable);
+            Statements = Statement.SeparatedAndTerminated(SemiColon.Then(SkipWhitespaces));
         }
 
         #endregion
@@ -132,8 +137,8 @@ namespace BassClefStudio.DbLanguage.Parser
             Header =
                 from t in OneOf(Try(Type.ThenReturn(true)), Contract.ThenReturn(false)).Before(Whitespace.AtLeastOnce())
                 from n in Name
-                from d in Whitespace.AtLeastOnce().Then(Colon.Between(SkipWhitespaces).Then(Path.Separated(Comma.Between(SkipWhitespaces)))).Optional()
-                select new StringTypeHeader() { Name = n, IsContract = t, Dependencies = d.GetValueOrDefault(new string[0]) };
+                from d in Colon.Between(SkipWhitespaces).Then(Path.Separated(Comma.Then(SkipWhitespaces))).Optional()
+                select new StringTypeHeader() { Name = n, IsConcrete = t, Dependencies = d.GetValueOrDefault(new string[0]) };
             
             Body = OneOf(Try(Property), Script).Separated(SkipWhitespaces);
 
@@ -158,6 +163,19 @@ namespace BassClefStudio.DbLanguage.Parser
         public StringLibrary CreateLibrary(TextReader textReader)
         {
             var result = LibraryParser.Parse(textReader);
+            if (result.Success)
+            {
+                return result.Value;
+            }
+            else
+            {
+                throw new ParseException(result.Error.RenderErrorMessage());
+            }
+        }
+
+        public StringType CreateClass(string code)
+        {
+            var result = Class.Parse(code);
             if (result.Success)
             {
                 return result.Value;

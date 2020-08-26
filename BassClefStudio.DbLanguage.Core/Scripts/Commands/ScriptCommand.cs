@@ -17,8 +17,6 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
         public ICommand GetScriptCommand { get; }
         public IEnumerable<ICommand> GetInputCommands { get; }
 
-        public string ThreadName { get; set; }
-
         /// <summary>
         /// Creates a new script command, that creates a new <see cref="Thread"/> with a parent <see cref="DataObject"/>'s context and starts the thread on a specific <see cref="ICommand"/>.
         /// </summary>
