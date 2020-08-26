@@ -58,7 +58,7 @@ namespace BassClefStudio.DbLanguage.Parser
     {
         public string ReturnType { get; set; }
         public IEnumerable<StringInput> Inputs { get; set; }
-        public IEnumerable<ICommand> Commands { get; set; }
+        public IEnumerable<ICodeStatement> Commands { get; set; }
 
         public override string ToString()
         {

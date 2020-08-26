@@ -1,31 +1,20 @@
-using BassClefStudio.DbLanguage.Parser;
+﻿using BassClefStudio.DbLanguage.Parser;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.IO;
+using System.Collections.Generic;
+using System.Text;
 
 namespace BassClefStudio.DbLanguage.Tests
 {
     [TestClass]
-    public class ParserUnitTests
+    public static class ParserUnitTests
     {
-        private static string TestCode;
-        private static StringReader TestCodeReader;
-        private static DbLanguageParser Parser;
+        public static DbLanguageParser Parser;
 
-        [ClassInitialize]
+        [AssemblyInitialize]
         public static void Initialize(TestContext context)
         {
-            TestCode =
-"type Blah:BlahParent,Namespace.IBlahContract{public int Property;string ToString(int number, Task task){ number = blah; RunMyCode(number, task); }}";
-            TestCodeReader = new StringReader(TestCode);
             Parser = new DbLanguageParser();
-        }
-
-        [TestMethod]
-        public void TestCodeParse()
-        {
-            var c = Parser.CreateClass(TestCode);
-            Console.WriteLine(c.ToString());
         }
     }
 }

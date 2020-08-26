@@ -3,6 +3,7 @@ using Pidgin;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml.Schema;
 using static Pidgin.Parser;
 using static Pidgin.Parser<char>;
@@ -35,6 +36,7 @@ namespace BassClefStudio.DbLanguage.Parser
         private readonly Parser<char, string> Type = String("type");
         private readonly Parser<char, string> Contract = String("contract");
         private readonly Parser<char, string> Var = String("var");
+        private readonly Parser<char, string> Return = String("return");
         #endregion
         #region Structures
         private Parser<char, string> String;
@@ -79,43 +81,57 @@ namespace BassClefStudio.DbLanguage.Parser
                 from t in Path.Before(Whitespace.AtLeastOnce())
                 from n in Name.Before(SkipWhitespaces)
                 from i in Input.Separated(Comma.Between(SkipWhitespaces)).Between(OpenParenthesis, CloseParenthesis)
-                from cs in Block(SkipWhitespaces.Then(Statements))
+                from cs in Block(SkipWhitespaces.Then(Lines))
                 select new StringScript() { IsPublic = v.GetValueOrDefault(false), ReturnType = t, Name = n, Inputs = i, Commands = cs } as StringChild;
         }
 
         #region Code
 
-        private Parser<char, IEnumerable<ICommand>> MethodInputs;
-        private Parser<char, ICommand> Method;
-        private Parser<char, ICommand> GetVariable;
-        private Parser<char, ICommand> SetVariable;
-        private Parser<char, ICommand> AddVariable;
-        private Parser<char, ICommand> Statement;
-        private Parser<char, ICommand> Value;
-        private Parser<char, IEnumerable<ICommand>> Statements;
+        private Parser<char, ICodeValue> GetValue;
+        private Parser<char, ICodeBoth> Method;
+        private Parser<char, ICodeStatement> VarStatement;
+        private Parser<char, ICodeStatement> AddStatement;
+        private Parser<char, ICodeStatement> SetStatement;
+        private Parser<char, ICodeStatement> ReturnStatement;
+
+        private Parser<char, ICodeValue> ValueStack;
+        private Parser<char, IEnumerable<ICodeValue>> AnyValue;
+        private Parser<char, ICodeBoth> Stack;
+        private Parser<char, ICodeStatement> AnyStatement;
+        private Parser<char, IEnumerable<ICodeStatement>> Lines;
 
         private void InitCode()
         {
-            MethodInputs = Rec(() => Value).Separated(Comma.Then(SkipWhitespaces)).Between(OpenParenthesis, CloseParenthesis);
-            GetVariable = Path.Select<ICommand>(p => new GetCommand(p));
-            Method =
-                from v in GetVariable
-                from i in MethodInputs
-                select new ScriptCommand(v, i) as ICommand;
-            
-            //AddVariable = 
-            //    from t in Path
-            //    from n in Name
-            //    select t == null ?  : new AddCommand(n, t)
-
-            SetVariable =
+            GetValue = Name.Select<ICodeValue>(n => new CodeGet() { Name = n });
+            Method = Rec(() => ValueStack).Separated(Comma.Then(SkipWhitespaces)).Between(OpenParenthesis, CloseParenthesis).Select<ICodeBoth>(i => new CodeCall() { Inputs = i });
+            VarStatement =
+                from v in Var.Before(Whitespace.AtLeastOnce())
+                from n in Name
+                select new CodeVar() { Name = n } as ICodeStatement;
+            AddStatement =
+                from t in Path.Before(Whitespace.AtLeastOnce())
+                from n in Name
+                select new CodeAdd() { Type = t, Name = n } as ICodeStatement;
+            SetStatement =
                 from p in Path
                 from eq in Equal.Between(SkipWhitespaces)
-                from v in Rec(() => Value)
-                select new SetCommand(p, v) as ICommand;
-            Value = Try(Method).Or(GetVariable);
-            Statement = Try(Method).Or(SetVariable);
-            Statements = Statement.SeparatedAndTerminated(SemiColon.Then(SkipWhitespaces));
+                from v in Rec(() => ValueStack)
+                select new CodeSet() { Path = p, Value = v } as ICodeStatement;
+            ReturnStatement =
+                from r in Return.Before(Whitespace.AtLeastOnce())
+                from v in Rec(() => ValueStack)
+                select new CodeReturn() { Value = v } as ICodeStatement;
+            AnyValue = Try(Map((a, b) => new ICodeValue[] { a, b } as IEnumerable<ICodeValue>, GetValue, Method)).Or(GetValue.Select<IEnumerable<ICodeValue>>(g => new ICodeValue[] { g }));
+            ValueStack = AnyValue.Separated(Dot).Select<ICodeValue>(v => new CodeValueStack() { Values = v.SelectMany(vs => vs) });
+            Stack = ValueStack.Bind(v =>
+            {
+                var stack = v as CodeValueStack;
+                return stack.Values.LastOrDefault() is ICodeBoth ?
+                    Return<ICodeBoth>(new CodeStack() { Values = stack.Values }) :
+                    Fail<ICodeBoth>("Stack ended in value, not method call - a line cannot end with a GET request, only a method call.");
+            });
+            AnyStatement = OneOf(Try(VarStatement), Try(AddStatement), Try(SetStatement), Try(ReturnStatement), Stack.As<char, ICodeStatement, ICodeBoth>());
+            Lines = AnyStatement.SeparatedAndTerminated(SemiColon.Then(SkipWhitespaces));
         }
 
         #endregion
@@ -145,10 +161,10 @@ namespace BassClefStudio.DbLanguage.Parser
             Header =
                 from t in OneOf(Try(Type.ThenReturn(true)), Contract.ThenReturn(false)).Before(Whitespace.AtLeastOnce())
                 from n in Name
-                from d in Colon.Between(SkipWhitespaces).Then(Path.Separated(Comma.Then(SkipWhitespaces))).Optional()
+                from d in Try(Colon.Between(SkipWhitespaces).Then(Path.SeparatedAtLeastOnce(Comma.Then(SkipWhitespaces)))).Optional()
                 select new StringTypeHeader() { Name = n, IsConcrete = t, Dependencies = d.GetValueOrDefault(new string[0]) };
             
-            Body = OneOf(Try(Property), Script).Separated(SkipWhitespaces);
+            Body = OneOf(Try(Property), Script).Before(SkipWhitespaces).Many();
 
             Class =
                 from h in Header
@@ -168,7 +184,8 @@ namespace BassClefStudio.DbLanguage.Parser
             InitLanguage();
         }
 
-        public StringLibrary CreateLibrary(TextReader textReader)
+        public StringLibrary ParseLibrary(string code) => ParseLibrary(new StringReader(code));
+        public StringLibrary ParseLibrary(TextReader textReader)
         {
             var result = LibraryParser.Parse(textReader);
             if (result.Success)
@@ -181,9 +198,24 @@ namespace BassClefStudio.DbLanguage.Parser
             }
         }
 
-        public StringType CreateClass(string code)
+        public StringType ParseClass(string code) => ParseClass(new StringReader(code));
+        public StringType ParseClass(TextReader reader)
         {
-            var result = Class.Parse(code);
+            var result = Class.Parse(reader);
+            if (result.Success)
+            {
+                return result.Value;
+            }
+            else
+            {
+                throw new ParseException(result.Error.RenderErrorMessage());
+            }
+        }
+
+        public IEnumerable<ICodeStatement> ParseCode(string code) => ParseCode(new StringReader(code));
+        public IEnumerable<ICodeStatement> ParseCode(TextReader reader)
+        {
+            var result = Lines.Parse(reader);
             if (result.Success)
             {
                 return result.Value;
@@ -201,5 +233,16 @@ namespace BassClefStudio.DbLanguage.Parser
         public ParseException(string message) : base(message) { }
         public ParseException(string message, Exception inner) : base(message, inner) { }
 
+    }
+
+    public static class ParseExtensions
+    {
+        /// <summary>
+        /// Creates a parser that runs the current parser and returns <typeparamref name="T3"/> as implemented interface or type <typeparamref name="T2"/>.
+        /// </summary>
+        public static Parser<T1, T2> As<T1, T2, T3>(this Parser<T1, T3> parser) where T3 : T2
+        {
+            return parser.Select<T2>(p => p);
+        }
     }
 }
