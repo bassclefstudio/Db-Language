@@ -122,7 +122,8 @@ namespace BassClefStudio.DbLanguage.Tests
 
         #endregion
         #region CodingPatterns
-        
+        #region InContext
+
         private ICodeStatement ParseStatementInContext(string statement)
         {
             var type = Parser.ParseClass($"type Blah {{ void Test() {{ {statement} }} }}");
@@ -133,28 +134,28 @@ namespace BassClefStudio.DbLanguage.Tests
         }
 
         [TestMethod]
-        public void RecognizeAddStatement()
+        public void RecognizeAddStatementInContext()
         {
             var statement = ParseStatementInContext("int Variable;");
             Assert.IsInstanceOfType(statement, typeof(CodeAdd));
         }
 
         [TestMethod]
-        public void RecognizeVarStatement()
+        public void RecognizeVarStatementInContext()
         {
             var statement = ParseStatementInContext("var Variable;");
             Assert.IsInstanceOfType(statement, typeof(CodeVar));
         }
 
         [TestMethod]
-        public void RecognizeSetStatement()
+        public void RecognizeSetStatementInContext()
         {
             var statement = ParseStatementInContext("Variable = blah;");
             Assert.IsInstanceOfType(statement, typeof(CodeSet));
         }
 
         [TestMethod]
-        public void RecognizeCallStatement()
+        public void RecognizeCallStatementInContext()
         {
             var statement = ParseStatementInContext("Method();");
             Assert.IsInstanceOfType(statement, typeof(CodeStack));
@@ -162,17 +163,65 @@ namespace BassClefStudio.DbLanguage.Tests
         }
 
         [TestMethod]
-        public void ValueAsStatementFails()
+        public void ValueAsStatementFailsInContext()
         {
             Assert.ThrowsException<ParseException>(() => ParseStatementInContext("Get.Value.As.Path;"));
         }
 
         [TestMethod]
-        public void TrickyValueAsStatementFails()
+        public void TrickyValueAsStatementFailsInContext()
         {
             Assert.ThrowsException<ParseException>(() => ParseStatementInContext("var.Value.As.Path;"));
         }
 
+        #endregion
+        #region StatementParser
+
+        private ICodeStatement GetFirstStatement(string code)
+        {
+            var statements = Parser.ParseCode(code);
+            Assert.IsTrue(statements.Count() == 1, "Expected only one statement.");
+            return statements.First();
+        }
+
+        [TestMethod]
+        public void ValueAsStatementFails()
+        {
+            Assert.ThrowsException<ParseException>(() => Parser.ParseCode("Get.Value.As.Path;"));
+        }
+
+        [TestMethod]
+        public void TrickyValueAsStatementFails()
+        {
+            Assert.ThrowsException<ParseException>(() => Parser.ParseCode("var.Value.As.Path;"));
+        }
+
+        [TestMethod]
+        public void StackGet()
+        {
+            var statement = GetFirstStatement("test = This.Is.A.Very.Long.Path;");
+            Assert.IsInstanceOfType(statement, typeof(CodeSet), "Expected statement of type CodeSet.");
+            var value = (statement as CodeSet).Value;
+            Assert.IsInstanceOfType(value, typeof(CodeValueStack), "Expected set parameter of type CodeValueStack");
+            var valueStack = (value as CodeValueStack).Values;
+            Assert.IsTrue(valueStack.All(v => v is CodeGet), "All values in CodeValueStack should be of type CodeGet");
+        }
+
+        [TestMethod]
+        public void StackGetWithMethod()
+        {
+            var statement = GetFirstStatement("test = This.Method().Path;");
+            Assert.IsInstanceOfType(statement, typeof(CodeSet), "Expected statement of type CodeSet.");
+            var value = (statement as CodeSet).Value;
+            Assert.IsInstanceOfType(value, typeof(CodeValueStack), "Expected set parameter of type CodeValueStack");
+            var valueStack = (value as CodeValueStack).Values.ToArray();
+            Assert.IsInstanceOfType(valueStack[0], typeof(CodeGet), "Stack[0] should be of type CodeGet");
+            Assert.IsInstanceOfType(valueStack[1], typeof(CodeGet), "Stack[1] should be of type CodeGet");
+            Assert.IsInstanceOfType(valueStack[2], typeof(CodeCall), "Stack[2] should be of type CodeCall");
+            Assert.IsInstanceOfType(valueStack[3], typeof(CodeGet), "Stack[3] should be of type CodeGet");
+        }
+
+        #endregion
         #endregion
     }
 }
