@@ -124,18 +124,20 @@ namespace BassClefStudio.DbLanguage.Core.Data
         #endregion
         #region Inheritance
 
-        private List<IType> ContainedTypes = null;
+        private IEnumerable<IType> ContainedTypes = null;
         private void BuildContainedTypes()
         {
             if (ContainedTypes == null)
             {
-                ContainedTypes = new List<IType>();
-                ContainedTypes.AddRange(InheritedContracts);
-                if (ParentType != null)
+                IEnumerable<IType> types;
+                types = (InheritedContracts as IEnumerable<IType>).Concat(new IType[] { this });
+                if(ParentType != null)
                 {
                     ParentType.BuildContainedTypes();
-                    ContainedTypes.AddRange(ParentType.ContainedTypes);
+                    types = types.Concat(ParentType.ContainedTypes);
                 }
+
+                ContainedTypes = types.Distinct();
             }
         }
 

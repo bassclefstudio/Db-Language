@@ -77,7 +77,7 @@ namespace BassClefStudio.DbLanguage.Tests.Parse
             string methodName = "Test";
             string returnType = "void";
             var script = CreateScript($"private {returnType} {methodName}(){{}}");
-            Assert.IsTrue(!script.IsPublic, "Visibility is not private.");
+            Assert.IsFalse(script.IsPublic, "Visibility is not private.");
         }
 
         [TestMethod]
@@ -94,7 +94,7 @@ namespace BassClefStudio.DbLanguage.Tests.Parse
             string methodName = "Test";
             string returnType = "void";
             var script = CreateScript($"{returnType} {methodName}(){{}}");
-            Assert.IsTrue(!script.IsPublic, "Visibility is not private.");
+            Assert.IsFalse(script.IsPublic, "Visibility is not private.");
         }
 
         [TestMethod]
