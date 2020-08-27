@@ -86,8 +86,7 @@ namespace BassClefStudio.DbLanguage.Core.Data
             }
 
             //// Get any DataContracts that are missing properties on the type.
-            BuildContainedTypes();
-            var unfulfilled = ContainedTypes.OfType<DataContract>().Where(c => !c.GetProperties().All(p => PublicProperties.Contains(p)));
+            var unfulfilled = InheritedContracts.Where(c => !c.GetProperties().All(p => PublicProperties.Contains(p)));
             if(unfulfilled.Any())
             {
                 throw new TypePropertyException($"One or more DataContracts are missing required properties on type {this.TypeName}: {string.Join(",", unfulfilled.Select(u => u.TypeName))}.");
