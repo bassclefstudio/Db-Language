@@ -10,40 +10,40 @@ using System.Threading.Tasks;
 namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
 {
     /// <summary>
-    /// Represents a memory SET command that writes a value to the <see cref="IWritableMemoryStack"/>.
+    /// Represents an abstract GET command which can retreive a property from another returned <see cref="DataObject"/>.
     /// </summary>
-    public class SetCommand : ICommand
+    public class GetOfCommand : ICommand
     {
         /// <inheritdoc/>
         public CapabilitiesCollection RequiredCapabilities { get; }
 
         /// <summary>
-        /// The path to the <see cref="DataObject"/> to be retrieved from memory.
+        /// An <see cref="ICommand"/> to retreive the initial object.
         /// </summary>
-        public string VarPath { get; }
+        public ICommand GetObjectCommand { get; }
 
         /// <summary>
-        /// The <see cref="ICommand"/> value which retreives the value to set the item in memory. Must match the <see cref="MemoryItem.Type"/>
+        /// The relative path to the <see cref="MemoryItem"/> on the parent <see cref="DataObject"/>.
         /// </summary>
-        public ICommand Value { get; }
+        public string Path { get; }
 
         /// <summary>
-        /// Creates a new memory SET command that sets the <see cref="MemoryItem.Value"/> of an item in memory.
+        /// Creates a new abstract GET command that gets a <see cref="DataObject"/> from a specified path on another <see cref="DataObject"/>.
         /// </summary>
+        /// <param name="getCommand">An <see cref="ICommand"/> to retreive the initial object.</param>
         /// <param name="path">The path to the <see cref="MemoryItem"/>.</param>
-        /// <param name="value">The <see cref="ICommand"/> value which retreives the value to set.</param>
-        public SetCommand(string path, ICommand value)
+        public GetOfCommand(ICommand getCommand, string path)
         {
-            VarPath = path;
-            Value = value;
+            GetObjectCommand = getCommand;
+            Path = path;
             RequiredCapabilities = new CapabilitiesCollection();
         }
 
         /// <inheritdoc/>
         public async Task<DataObject> ExecuteCommandAsync(DataObject me, Thread thread)
         {
-            thread.MemoryStack.SetPath(VarPath, await Value.ExecuteCommandAsync(me, thread));
-            return null;
+            var o = await GetObjectCommand.ExecuteCommandAsync(me, thread);
+            return o.GetPath(Path).Value;
         }
     }
 }

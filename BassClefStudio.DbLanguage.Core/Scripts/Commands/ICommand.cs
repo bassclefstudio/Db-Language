@@ -17,58 +17,27 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
         /// <summary>
         /// A <see cref="CapabilitiesCollection"/> which contains all of the reuqired <see cref="Capability"/> objects a <see cref="Thread"/>'s <see cref="CapabilitiesCollection"/> object must have in order to run the command.
         /// </summary>
-        CapabilitiesCollection Requiredcapabilities { get; }
-    }
+        CapabilitiesCollection RequiredCapabilities { get; }
 
-    public interface IActionCommand : ICommand
-    { 
-        /// <summary>
-        /// Executes the command.
-        /// </summary>
-        /// <param name="myStack">The stack of memory available to the command, including the ability to create script memory in the topmost layer.</param>
-        /// <param name="pointer">The pointer that controls movement to each <see cref="ICommand"/>, This allows for a <see cref="ICommand"/> to change at runtime which <see cref="ICommand"/> follows it. This parameter should only be included when the command is being run by a <see cref="Thread"/>.</param>
-        /// <param name="capabilities">The capabilities of the thread that called the <see cref="ICommand"/> - a script cannot declare more capabilities than what the calling object passes to it.</param>
-        DataObject Execute(DataObject me, IWritableMemoryStack myStack, CapabilitiesCollection capabilities);
-    }
-
-    public interface IAsyncCommand : ICommand
-    {
         /// <summary>
         /// Executes the command asynchronously.
         /// </summary>
-        /// <param name="myStack">The stack of memory available to the command, including the ability to create script memory in the topmost layer.</param>
-        /// <param name="pointer">The pointer that controls movement to each <see cref="ICommand"/>, This allows for a <see cref="ICommand"/> to change at runtime which <see cref="ICommand"/> follows it. This parameter should only be included when the command is being run by a <see cref="Thread"/>.</param>
-        /// <param name="capabilities">The capabilities of the thread that called the <see cref="ICommand"/> - a script cannot declare more capabilities than what the calling object passes to it.</param>
-        Task<DataObject> Execute(DataObject me, IWritableMemoryStack myStack, CapabilitiesCollection capabilities);
-    }
-
-
-    public class CommandException : Exception
-    {
-        public CommandException() { }
-        public CommandException(string message) : base(message) { }
-        public CommandException(string message, Exception inner) : base(message, inner) { }
+        /// <param name="me">The owning <see cref="DataObject"/> making the call to the <see cref="ICommand"/>.</param>
+        /// <param name="thread">The owning <see cref="Thread"/> object, which manages the memory and <see cref="CapabilitiesCollection"/> for the <see cref="ICommand"/>.</param>
+        Task<DataObject> ExecuteCommandAsync(DataObject me, Thread thread);
     }
 
     /// <summary>
-    /// Provides extension methods that support running different types of <see cref="ICommand"/> instances through one method.
+    /// Represents an <see cref="Exception"/> thrown from within the Db language, by an <see cref="ICommand"/>.
     /// </summary>
-    public static class CommandExtensions
+    public class CommandException : Exception
     {
-        public static async Task<DataObject> ExecuteCommandAsync(this ICommand command, DataObject me, IWritableMemoryStack myStack, CapabilitiesCollection capabilities)
-        {
-            if (command is IActionCommand actionCommand)
-            {
-                return actionCommand.Execute(me, myStack, capabilities);
-            }
-            else if (command is IAsyncCommand asyncCommand)
-            {
-                return await asyncCommand.Execute(me, myStack, capabilities);
-            }
-            else
-            {
-                throw new CommandException($"Cannot execute commands of type {command?.GetType()}");
-            }
-        }
+        /// <summary>
+        /// The Db <see cref="DataObject"/> provided as the exception information object.
+        /// </summary>
+        public DataObject ExceptionObject { get; }
+
+        public CommandException(string message, DataObject exceptionObject  = null) : base(message) => ExceptionObject = exceptionObject;
+        public CommandException(string message, Exception innerException, DataObject exceptionObject = null) : base(message, innerException) => ExceptionObject = exceptionObject;
     }
 }

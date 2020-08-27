@@ -12,10 +12,10 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
     /// <summary>
     /// Represents a memory GET command that returns value from the <see cref="IWritableMemoryStack"/>.
     /// </summary>
-    public class GetCommand : IActionCommand
+    public class GetCommand : ICommand
     {
         /// <inheritdoc/>
-        public CapabilitiesCollection Requiredcapabilities { get; }
+        public CapabilitiesCollection RequiredCapabilities { get; }
 
         /// <summary>
         /// The path to the <see cref="DataObject"/> to be retrieved from memory.
@@ -23,21 +23,19 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
         public string VarPath { get; }
 
         /// <summary>
-        /// Creates a new memory GET command that gets a <see cref="DataObject"/> from a specified path memory.
+        /// Creates a new memory GET command that gets a <see cref="DataObject"/> from a specified path in memory.
         /// </summary>
         /// <param name="path">The path to the <see cref="MemoryItem"/>.</param>
         public GetCommand(string path)
         {
             VarPath = path;
-            Requiredcapabilities = new CapabilitiesCollection();
+            RequiredCapabilities = new CapabilitiesCollection();
         }
 
         /// <inheritdoc/>
-        public DataObject Execute(DataObject me, IWritableMemoryStack myStack, CapabilitiesCollection capabilities)
+        public async Task<DataObject> ExecuteCommandAsync(DataObject me, Thread thread)
         {
-            //// TODO: Come back and fix this!!
-            ////return myStack.GetPath(VarPath).Value;
-            throw new NotImplementedException();
+            return thread.MemoryStack.GetPath(VarPath).Value;
         }
     }
 }
