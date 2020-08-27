@@ -68,10 +68,13 @@ namespace BassClefStudio.DbLanguage.Core.Data
             PublicProperties = new List<MemoryProperty>();
             PrivateProperties = new List<MemoryProperty>();
 
-            PublicProperties.AddRange(ParentType.PublicProperties);
-            PublicProperties.AddRange(newPublic);
+            if(ParentType != null)
+            {
+                PublicProperties.AddRange(ParentType.PublicProperties);
+                PrivateProperties.AddRange(ParentType.PrivateProperties);
+            }
 
-            PrivateProperties.AddRange(ParentType.PrivateProperties);
+            PublicProperties.AddRange(newPublic);
             PrivateProperties.AddRange(newPrivate);
 
             //// Get any properties that have duplicate paths.
@@ -83,8 +86,7 @@ namespace BassClefStudio.DbLanguage.Core.Data
             }
 
             //// Get any DataContracts that are missing properties on the type.
-            BuildContainedTypes();
-            var unfulfilled = ContainedTypes.OfType<DataContract>().Where(c => c.GetProperties().All(p => PublicProperties.Contains(p)));
+            var unfulfilled = InheritedContracts.Where(c => !c.GetProperties().All(p => PublicProperties.Contains(p)));
             if(unfulfilled.Any())
             {
                 throw new TypePropertyException($"One or more DataContracts are missing required properties on type {this.TypeName}: {string.Join(",", unfulfilled.Select(u => u.TypeName))}.");
@@ -121,23 +123,25 @@ namespace BassClefStudio.DbLanguage.Core.Data
         #endregion
         #region Inheritance
 
-        private List<IType> ContainedTypes = null;
-        private void BuildContainedTypes()
-        {
-            if (ContainedTypes == null)
-            {
-                ContainedTypes = new List<IType>();
-                ContainedTypes.AddRange(InheritedContracts);
-                ParentType.BuildContainedTypes();
-                ContainedTypes.AddRange(ParentType.ContainedTypes);
-            }
-        }
-
         /// <inheritdoc/>
         public bool Is(IType other)
         {
-            BuildContainedTypes();
-            return ContainedTypes.Contains(other);
+            if (other == this)
+            {
+                return true;
+            }
+            else if (InheritedContracts.Any(c => c.Is(other)))
+            {
+                return true;
+            }
+            else if (ParentType != null && ParentType.Is(other))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         #endregion
