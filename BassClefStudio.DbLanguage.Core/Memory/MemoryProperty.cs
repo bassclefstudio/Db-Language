@@ -38,6 +38,10 @@ namespace BassClefStudio.DbLanguage.Core.Memory
         {
             Key = key;
             Type = type;
+            if (Type == null)
+            {
+                throw new ArgumentException("The type parameter of a MemoryProperty is required and cannot be null.");
+            }
             Flags = flags;
         }
 

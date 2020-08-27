@@ -47,7 +47,7 @@ namespace BassClefStudio.DbLanguage.Tests.Parse
         public void CheckTypeContractParse()
         {
             string code = "contract Blah {}";
-            Assert.IsTrue(!Parser.ParseClass(code).Header.IsConcrete);
+            Assert.IsFalse(Parser.ParseClass(code).Header.IsConcrete);
         }
 
         [TestMethod]
