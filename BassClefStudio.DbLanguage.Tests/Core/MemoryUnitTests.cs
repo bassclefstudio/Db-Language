@@ -47,28 +47,6 @@ namespace BassClefStudio.DbLanguage.Tests.Core
         }
 
         [TestMethod]
-        public void CreateObject()
-        {
-            DataObject o = new DataObject(TestType);
-            Assert.IsTrue(o.DataType == TestType, "DataType type not set.");
-        }
-
-        [TestMethod]
-        public void TrySetTypeBinding()
-        {
-            DataObject o = new DataObject(TestType);
-            o.TrySetObject<string>("This is a test");
-            Assert.AreEqual("This is a test", o.GetObject<string>(), "Could not store and retreive bound object.");
-        }
-
-        [TestMethod]
-        public void InvalidTypeBinding()
-        {
-            DataObject o = new DataObject(TestType);
-            Assert.ThrowsException<TypeBindingException>(() => o.TrySetObject<int>(13));
-        }
-
-        [TestMethod]
         public void SetMemoryItem()
         {
             MemoryItem testItem = new MemoryItem(new MemoryProperty("Prop", TestType));
@@ -89,7 +67,34 @@ namespace BassClefStudio.DbLanguage.Tests.Core
         #endregion
         #region Groups
 
+        [TestMethod]
+        public void DuplicateMemoryInGroup()
+        {
+            IWritableMemoryGroup testGroup = new MemoryGroup();
+            MemoryProperty prop = new MemoryProperty("Property", new DataType("TestType", new MemoryProperty[0], new MemoryProperty[0]));
+            MemoryItem i = new MemoryItem(prop);
+            Assert.IsTrue(testGroup.Add(i), "Failed to add item.");
+            Assert.IsFalse(testGroup.Add(i), "Duplicate was allowed to be added.");
+        }
 
+        [TestMethod]
+        public void DuplicatePropertyInGroup()
+        {
+            IWritableMemoryGroup testGroup = new MemoryGroup();
+            MemoryProperty prop = new MemoryProperty("Property", new DataType("TestType", new MemoryProperty[0], new MemoryProperty[0]));
+            Assert.IsTrue(testGroup.Add(new MemoryItem(prop)), "Failed to add item.");
+            Assert.IsFalse(testGroup.Add(new MemoryItem(prop)), "Duplicate property was allowed to be added.");
+        }
+
+        [TestMethod]
+        public void DuplicateNameInGroup()
+        {
+            IWritableMemoryGroup testGroup = new MemoryGroup();
+            MemoryProperty prop = new MemoryProperty("Property", new DataType("TestType", new MemoryProperty[0], new MemoryProperty[0]));
+            MemoryProperty prop2 = new MemoryProperty("Property", new DataType("TestType", new MemoryProperty[0], new MemoryProperty[0]));
+            Assert.IsTrue(testGroup.Add(new MemoryItem(prop)), "Failed to add item.");
+            Assert.IsFalse(testGroup.Add(new MemoryItem(prop2)), "Duplicate name was allowed to be added.");
+        }
 
         #endregion
         #region Stacks
