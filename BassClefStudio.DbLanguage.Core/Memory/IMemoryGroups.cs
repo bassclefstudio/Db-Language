@@ -1,4 +1,5 @@
 ﻿using BassClefStudio.DbLanguage.Core.Data;
+using BassClefStudio.DbLanguage.Core.Documentation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -111,13 +112,12 @@ namespace BassClefStudio.DbLanguage.Core.Memory
         /// <param name="group">The base memory group.</param>
         /// <param name="path">The dot-delimited path to the desired <see cref="MemoryItem"/>.</param>
         /// <returns><see cref="bool"/> value indicating the result of the check.</returns>
-        public static bool ContainsPath(this IMemoryGroup group, string path)
+        public static bool ContainsPath(this IMemoryGroup group, Namespace path)
         {
-            string[] pathParts = path.Split(new string[] { "." }, StringSplitOptions.RemoveEmptyEntries);
-            if (group.ContainsKey(pathParts[0]))
+            if (group.ContainsKey(path.NameParts[0]))
             {
-                MemoryItem current = group.Get(pathParts[0]);
-                foreach (var part in pathParts.Skip(1))
+                MemoryItem current = group.Get(path.NameParts[0]);
+                foreach (var part in path.NameParts.Skip(1))
                 {
                     if (current.Value.ContainsKey(part))
                     {
@@ -143,11 +143,10 @@ namespace BassClefStudio.DbLanguage.Core.Memory
         /// <param name="group">The base memory group.</param>
         /// <param name="path">The dot-delimited path to the desired <see cref="MemoryItem"/>.</param>
         /// <returns>The <see cref="MemoryItem"/> property value.</returns>
-        public static MemoryItem GetPath(this IMemoryGroup group, string path)
+        public static MemoryItem GetPath(this IMemoryGroup group, Namespace path)
         {
-            string[] pathParts = path.Split(new string[] { "." }, StringSplitOptions.RemoveEmptyEntries);
-            MemoryItem current = group.Get(pathParts[0]);
-            foreach (var part in pathParts.Skip(1))
+            MemoryItem current = group.Get(path.NameParts[0]);
+            foreach (var part in path.NameParts.Skip(1))
             {
                 current = current.Value.Get(part);
             }
@@ -161,15 +160,14 @@ namespace BassClefStudio.DbLanguage.Core.Memory
         /// <param name="path">The dot-delimited path to the desired <see cref="MemoryItem"/>.</param>
         /// <param name="value">The value to set. The <paramref name="value"/> must have a <see cref="BassClefStudio.DbLanguage.Core.Data.DataObject.DataType"/> that inherits from or is the <see cref="MemoryItem.DataType"/>.</param>
         /// <returns>A <see cref="bool"/> indicating whether the operation succeeded.</returns>
-        public static bool SetPath(this IMemoryGroup group, string path, DataObject value)
+        public static bool SetPath(this IMemoryGroup group, Namespace path, DataObject value)
         {
-            string[] pathParts = path.Split(new string[] { "." }, StringSplitOptions.RemoveEmptyEntries);
-            MemoryItem current = group.Get(pathParts[0]);
-            foreach (var part in pathParts.Skip(1).Take(pathParts.Length - 2))
+            MemoryItem current = group.Get(path.NameParts[0]);
+            foreach (var part in path.NameParts.Skip(1).Take(path.NameParts.Length - 2))
             {
                 current = current.Value.Get(part);
             }
-            return current.Value.Set(pathParts.Last(), value);
+            return current.Value.Set(path.NameParts.Last(), value);
         }
     }
 }

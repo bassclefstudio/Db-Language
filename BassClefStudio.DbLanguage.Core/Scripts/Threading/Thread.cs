@@ -26,79 +26,73 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Threading
         public CapabilitiesCollection Capabilities { get; }
 
         /// <summary>
-        /// The <see cref="CommandPointer"/> of a <see cref="Thread"/> is used to determine the next <see cref="ICommand"/> that should be run.
+        /// The <see cref="ThreadPointer"/> of a <see cref="Thread"/> is used to manage the <see cref="ICommand"/>s that should be run, returning, and managing exceptions.
         /// </summary>
-        public CommandPointer Pointer { get; private set; }
+        public ThreadPointer Pointer { get; private set; }
 
         /// <summary>
-        /// The memory stack is used to store the context of the <see cref="DataObject"/> where the thread is running as well as thread memory and scopes.
+        /// Memory context, such as static type information, specific to the environment where the <see cref="Thread"/> is executing.
+        /// </summary>
+        public IMemoryGroup Context { get; }
+
+        /// <summary>
+        /// The memory stack is used to store the context and <see cref="DataObject"/> memory of where the thread is running as well as thread memory and scopes.
         /// </summary>
         public IWritableMemoryStack MemoryStack { get; private set; }
 
         /// <summary>
-        /// Creates a new thread with a name and <see cref="Scripts.capabilityCollection"/>.
+        /// Creates a new <see cref="Thread"/>
         /// </summary>
         /// <param name="name">The name of the thread.</param>
         /// <param name="capabilities">A collection of capabilities that the <see cref="Thread"/> has to run certain <see cref="ICommand"/> commands.</param>
-        public Thread(string name, CapabilitiesCollection capabilities, CommandPointer pointer)
+        /// <param name="pointer">The <see cref="ThreadPointer"/> contains information about the <see cref="ICommand"/>s that will be run on the <see cref="Thread"/>.</param>
+        /// <param name="context">Memory context, such as static type information, specific to the environment where the <see cref="Thread"/> is executing.</param>
+        public Thread(string name, CapabilitiesCollection capabilities, ThreadPointer pointer, IMemoryGroup context)
         {
             Name = name;
             Capabilities = capabilities;
             Pointer = pointer;
+            Context = context;
         }
 
         /// <summary>
-        /// Starts the execution of a thread at a specific <see cref="ICommand"/> with a memory context in the form of a <see cref="DataObject"/>.
+        /// Creates a new thread as a child of another <see cref="Thread"/>. 
         /// </summary>
-        /// <param name="me">The owning <see cref="DataObject"/>, which executes the commands and provides bound .NET objects and <see cref="DataStructure"/> info. This <see cref="DataObject"/> also provides the memory/type context for this <see cref="Thread"/>.</param>
-        public async Task RunThreadAsync(DataObject me)
-            => await RunThreadAsync(me, me.MemoryStack, new MemoryGroup());
-
-        /// <summary>
-        /// Starts the execution of a thread at a specific <see cref="ICommand"/> with a memory context in the form of an <see cref="IMemoryStack"/>.
-        /// </summary>
-        /// <param name="me">The owning <see cref="DataObject"/>, which executes the commands and provides bound .NET objects and <see cref="DataStructure"/> info.</param>
-        /// <param name="context">Memory context, such as types and public/private properties. This is often the same context as that found in the <see cref="DataObject.MemoryStack"/> of the owning <see cref="DataObject"/> <paramref name="me"/>.</param>
-        public async Task RunThreadAsync(DataObject me, IMemoryStack context)
-            => await RunThreadAsync(me, context, new MemoryGroup());
-
-        /// <summary>
-        /// Starts the execution of a thread at a specific <see cref="ICommand"/> with a memory context in the form of a <see cref="DataObject"/> and an input <see cref="IWritableMemoryGroup"/>.
-        /// </summary>
-        /// <param name="me">The owning <see cref="DataObject"/>, which executes the commands and provides bound .NET objects and <see cref="DataStructure"/> info. This <see cref="DataObject"/> also provides the memory/type context for this <see cref="Thread"/>.</param>
-        /// <param name="inputs">Memory context in the form of local variables such as inputs, usually provided by the calling <see cref="ICommand"/> or its <see cref="DataObject"/>.</param>
-        public async Task RunThreadAsync(DataObject me, IWritableMemoryGroup inputs)
-            => await RunThreadAsync(me, me.MemoryStack, inputs);
+        /// <param name="name">The (optional) name of the thread. Defaults to the name of the parent "<see cref="Thread.Name"/>_{#}"</param>
+        /// <param name="pointer">The <see cref="ThreadPointer"/> contains information about the <see cref="ICommand"/>s that will be run on the <see cref="Thread"/>.</param>
+        /// <param name="parent">The parent <see cref="Thread"/> to create this <see cref="Thread"/> instance from. The <see cref="Thread.Context"/>, <see cref="Thread.Capabilities"/>, and other related data will be copied from the parent.</param>
+        public Thread(Thread parent, ThreadPointer pointer, string name = null)
+        {
+            Name = name ?? $"{parent.Name}_{Guid.NewGuid()}";
+            Capabilities = parent.Capabilities;
+            Pointer = pointer;
+            Context = parent.Context;
+        }
 
         /// <summary>
         /// Starts the execution of a thread at a specific <see cref="ICommand"/> with a memory context in the form of an <see cref="IMemoryStack"/> and an input <see cref="IWritableMemoryGroup"/>.
         /// </summary>
-        /// <param name="me">The owning <see cref="DataObject"/>, which executes the commands and provides bound .NET objects and <see cref="DataStructure"/> info.</param>
-        /// <param name="context">Memory context, such as types and public/private properties. This is often the same context as that found in the <see cref="DataObject.MemoryStack"/> of the owning <see cref="DataObject"/> <paramref name="me"/>.</param>
-        /// <param name="inputs">Memory context in the form of local variables such as inputs, usually provided by the calling <see cref="ICommand"/> or its <see cref="DataObject"/>.</param>
-        public async Task RunThreadAsync(DataObject me, IMemoryStack context, IWritableMemoryGroup inputs)
+        /// <param name="me">The owning <see cref="DataObject"/>, which executes the commands and provides bound .NET objects.</param>
+        /// <param name="inputs">Memory context in the form of local variables such as inputs or scoped variables.</param>
+        public async Task RunThreadAsync(DataObject me, IMemoryGroup inputs)
         {
             ////Initializes memory.
             MemoryStack = new MemoryStack();
-            MemoryStack.Push(context);
+            MemoryStack.Push(Context);
+            MemoryStack.Push(me.MemoryStack);
             MemoryStack.Push(inputs);
-
-            ////Now, for example, I could add a new item to the memory knowing the top layer is writable:
-            ////
-            ////    Memory.Add(new MemoryItem("Test", [My_DataType]));
-            ////
-            ////I can also, of course, push and pull layers for different scopes (note: a script that pushes a scope should run on the same thred to preserve thread memory in this way).
+            MemoryStack.Push();
 
             while (!Pointer.IsStopped)
             {
-                if (Capabilities.CanAccess(Pointer.CurrentCommand.Requiredcapabilities))
+                if (Capabilities.CanAccess(Pointer.CurrentCommand.RequiredCapabilities))
                 {
-                    await Pointer.CurrentCommand.ExecuteCommandAsync(me, MemoryStack, Capabilities);
+                    await Pointer.CurrentCommand.ExecuteCommandAsync(me, this);
                     Pointer.Next();
                 }
                 else
                 {
-                    throw new CapabilityException($"Thread does not have the required capabilities to execute command. capabilities required:\r\n{string.Join(", ", Pointer.CurrentCommand.Requiredcapabilities.RequiredCapabilities.Select(p => p.ToString()))}");
+                    throw new CapabilityException($"Thread does not have the required capabilities to execute command. capabilities required:\r\n{string.Join(", ", Pointer.CurrentCommand.RequiredCapabilities.RequiredCapabilities.Select(p => p.ToString()))}");
                 }
             }
         }

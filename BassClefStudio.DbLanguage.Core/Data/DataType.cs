@@ -29,7 +29,7 @@ namespace BassClefStudio.DbLanguage.Core.Data
         public DataType ParentType { get; }
 
         #endregion
-        #region Constructor
+        #region Initialize
 
         public DataType(Namespace typeName, IEnumerable<MemoryProperty> publicProperties, IEnumerable<MemoryProperty> privateProperties, IEnumerable<DataContract> contracts = null, DataType parentType = null)
         {
@@ -79,7 +79,7 @@ namespace BassClefStudio.DbLanguage.Core.Data
             var duplicates = allProperties.Where(p => allProperties.Count(a => a == p) > 1);
             if (duplicates.Any())
             {
-                throw new TypePropertyException($"One or more property keys are used more than once in the same enclosing type: {string.Join(",", duplicates.Select(d => d.Key).Distinct())}");
+                throw new TypePropertyException($"One or more property keys are used more than once in the same enclosing type {this.TypeName}: {string.Join(",", duplicates.Select(d => d.Key).Distinct())}.");
             }
 
             //// Get any DataContracts that are missing properties on the type.
@@ -87,7 +87,7 @@ namespace BassClefStudio.DbLanguage.Core.Data
             var unfulfilled = ContainedTypes.OfType<DataContract>().Where(c => c.GetProperties().All(p => PublicProperties.Contains(p)));
             if(unfulfilled.Any())
             {
-                throw new TypePropertyException($"One or more DataContracts are missing required properties on this type: {string.Join(",", unfulfilled.Select(u => u.TypeName))}");
+                throw new TypePropertyException($"One or more DataContracts are missing required properties on type {this.TypeName}: {string.Join(",", unfulfilled.Select(u => u.TypeName))}.");
             }
         }
 
