@@ -5,10 +5,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace BassClefStudio.DbLanguage.Tests
+namespace BassClefStudio.DbLanguage.Tests.Parse
 {
     [TestClass]
-    public class TypeHeaderUnitTests
+    public class TypeHeaderParseUnitTests
     {
         public DbLanguageParser Parser => ParserUnitTests.Parser;
 

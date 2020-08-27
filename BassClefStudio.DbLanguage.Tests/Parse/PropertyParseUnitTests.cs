@@ -4,10 +4,10 @@ using System;
 using System.IO;
 using System.Linq;
 
-namespace BassClefStudio.DbLanguage.Tests
+namespace BassClefStudio.DbLanguage.Tests.Parse
 {
     [TestClass]
-    public class PropertyUnitTests
+    public class PropertyParseUnitTests
     {
         public DbLanguageParser Parser => ParserUnitTests.Parser;
 

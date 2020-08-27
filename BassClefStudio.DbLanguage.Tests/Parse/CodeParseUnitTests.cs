@@ -6,10 +6,10 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
-namespace BassClefStudio.DbLanguage.Tests
+namespace BassClefStudio.DbLanguage.Tests.Parse
 {
     [TestClass]
-    public class CodeUnitTests
+    public class CodeParseUnitTests
     {
         public DbLanguageParser Parser => ParserUnitTests.Parser;
 
