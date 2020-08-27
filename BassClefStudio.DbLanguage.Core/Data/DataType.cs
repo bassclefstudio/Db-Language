@@ -68,10 +68,13 @@ namespace BassClefStudio.DbLanguage.Core.Data
             PublicProperties = new List<MemoryProperty>();
             PrivateProperties = new List<MemoryProperty>();
 
-            PublicProperties.AddRange(ParentType.PublicProperties);
-            PublicProperties.AddRange(newPublic);
+            if(ParentType != null)
+            {
+                PublicProperties.AddRange(ParentType.PublicProperties);
+                PrivateProperties.AddRange(ParentType.PrivateProperties);
+            }
 
-            PrivateProperties.AddRange(ParentType.PrivateProperties);
+            PublicProperties.AddRange(newPublic);
             PrivateProperties.AddRange(newPrivate);
 
             //// Get any properties that have duplicate paths.
@@ -128,8 +131,11 @@ namespace BassClefStudio.DbLanguage.Core.Data
             {
                 ContainedTypes = new List<IType>();
                 ContainedTypes.AddRange(InheritedContracts);
-                ParentType.BuildContainedTypes();
-                ContainedTypes.AddRange(ParentType.ContainedTypes);
+                if (ParentType != null)
+                {
+                    ParentType.BuildContainedTypes();
+                    ContainedTypes.AddRange(ParentType.ContainedTypes);
+                }
             }
         }
 
