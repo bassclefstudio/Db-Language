@@ -23,7 +23,7 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
         public string VarPath { get; }
 
         /// <summary>
-        /// The <see cref="ICommand"/> value which retreives the value to set the item in memory. Must match the <see cref="MemoryItem.Type"/>
+        /// The <see cref="ICommand"/> value which retreives the value to set the item in memory. Must match the <see cref="MemoryProperty.Type"/> of the item.
         /// </summary>
         public ICommand Value { get; }
 
