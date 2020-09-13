@@ -1,4 +1,4 @@
-﻿using BassClefStudio.DbLanguage.Parser;
+﻿using BassClefStudio.DbLanguage.Compiler.Parse;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -11,7 +11,7 @@ namespace BassClefStudio.DbLanguage.Tests.Parse
     [TestClass]
     public class CodeParseUnitTests
     {
-        public DbLanguageParser Parser => ParserUnitTests.Parser;
+        internal DbLanguageParser Parser => ParserUnitTests.Parser;
 
         #region Syntax
 

@@ -6,16 +6,16 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace BassClefStudio.DbLanguage.Parser
+namespace BassClefStudio.DbLanguage.Compiler.Parse
 {
-    public class StringLibrary
+    internal class StringLibrary
     {
         public string Name { get; set; }
         public IEnumerable<string> Dependencies { get; set; }
         public IEnumerable<StringType> DefinedTypes { get; set; }
     }
 
-    public class StringType
+    internal class StringType
     {
         public StringTypeHeader Header { get; set; }
         public IEnumerable<StringChild> Properties { get; set; }
@@ -26,7 +26,7 @@ namespace BassClefStudio.DbLanguage.Parser
         }
     }
 
-    public class StringTypeHeader
+    internal class StringTypeHeader
     {
         public string Name { get; set; }
         public bool IsConcrete { get; set; }
@@ -38,13 +38,13 @@ namespace BassClefStudio.DbLanguage.Parser
         }
     }
 
-    public class StringChild
+    internal class StringChild
     {
         public string Name { get; set; }
         public bool IsPublic { get; set; }
     }
 
-    public class StringProperty : StringChild
+    internal class StringProperty : StringChild
     {
         public string Type { get; set; }
 
@@ -54,7 +54,7 @@ namespace BassClefStudio.DbLanguage.Parser
         }
     }
 
-    public class StringScript : StringChild
+    internal class StringScript : StringChild
     {
         public string ReturnType { get; set; }
         public IEnumerable<StringInput> Inputs { get; set; }
@@ -66,7 +66,7 @@ namespace BassClefStudio.DbLanguage.Parser
         }
     }
 
-    public class StringInput
+    internal class StringInput
     {
         public string Name { get; set; }
         public string Type { get; set; }

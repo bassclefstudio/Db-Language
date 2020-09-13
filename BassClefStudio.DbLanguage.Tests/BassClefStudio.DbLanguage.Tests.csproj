@@ -14,7 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BassClefStudio.DbLanguage.Parser\BassClefStudio.DbLanguage.Parser.csproj" />
+    <ProjectReference Include="..\BassClefStudio.DbLanguage.Compiler\BassClefStudio.DbLanguage.Compiler.csproj" />
+    <ProjectReference Include="..\BassClefStudio.DbLanguage.Core\BassClefStudio.DbLanguage.Core.csproj" />
   </ItemGroup>
 
 </Project>

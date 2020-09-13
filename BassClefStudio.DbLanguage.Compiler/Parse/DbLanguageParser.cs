@@ -8,11 +8,14 @@ using System.Xml.Schema;
 using static Pidgin.Parser;
 using static Pidgin.Parser<char>;
 
-namespace BassClefStudio.DbLanguage.Parser
+namespace BassClefStudio.DbLanguage.Compiler.Parse
 {
-    public class DbLanguageParser
+    /// <summary>
+    /// A parser based on the <see cref="Pidgin.Parser"/> framework that converts <see cref="string"/> code to a tokenized <see cref="StringLibrary"/>. Supports recursion and complex commands across the full Db language, along with exception support.
+    /// </summary>
+    internal class DbLanguageParser
     {
-        public Parser<char, StringLibrary> LibraryParser { get; }
+        private Parser<char, StringLibrary> LibraryParser { get; }
 
         #region Basic
         #region Symbols
@@ -175,6 +178,9 @@ namespace BassClefStudio.DbLanguage.Parser
         #endregion
         #endregion
 
+        /// <summary>
+        /// Creates a new <see cref="DbLanguageParser"/>, initializing the language parsing frameworks.
+        /// </summary>
         public DbLanguageParser()
         {
             InitStructures();
@@ -184,7 +190,15 @@ namespace BassClefStudio.DbLanguage.Parser
             InitLanguage();
         }
 
+        /// <summary>
+        /// Parses the code for a Db library (collection of types) into a <see cref="StringLibrary"/>.
+        /// </summary>
+        /// <param name="code">The <see cref="string"/> code.</param>
         public StringLibrary ParseLibrary(string code) => ParseLibrary(new StringReader(code));
+        /// <summary>
+        /// Parses the code for a Db library (collection of types) into a <see cref="StringLibrary"/>.
+        /// </summary>
+        /// <param name="textReader">A <see cref="TextReader"/> that can read a block of code.</param>
         public StringLibrary ParseLibrary(TextReader textReader)
         {
             var result = LibraryParser.Parse(textReader);
@@ -198,10 +212,18 @@ namespace BassClefStudio.DbLanguage.Parser
             }
         }
 
+        /// <summary>
+        /// Parses the code for a Db class (a type or contract) into a <see cref="StringType"/>.
+        /// </summary>
+        /// <param name="code">The <see cref="string"/> code.</param>
         public StringType ParseClass(string code) => ParseClass(new StringReader(code));
-        public StringType ParseClass(TextReader reader)
+        /// <summary>
+        /// Parses the code for a Db class (a type or contract) into a <see cref="StringType"/>.
+        /// </summary>
+        /// <param name="textReader">A <see cref="TextReader"/> that can read a block of code.</param>
+        public StringType ParseClass(TextReader textReader)
         {
-            var result = Class.Parse(reader);
+            var result = Class.Parse(textReader);
             if (result.Success)
             {
                 return result.Value;
@@ -212,10 +234,18 @@ namespace BassClefStudio.DbLanguage.Parser
             }
         }
 
+        /// <summary>
+        /// Parses a block of Db code into a collection of <see cref="ICodeStatement"/>s.
+        /// </summary>
+        /// <param name="code">The <see cref="string"/> code.</param>
         public IEnumerable<ICodeStatement> ParseCode(string code) => ParseCode(new StringReader(code));
-        public IEnumerable<ICodeStatement> ParseCode(TextReader reader)
+        /// <summary>
+        /// Parses a block of Db code into a collection of <see cref="ICodeStatement"/>s.
+        /// </summary>
+        /// <param name="textReader">A <see cref="TextReader"/> that can read a block of code.</param>
+        public IEnumerable<ICodeStatement> ParseCode(TextReader textReader)
         {
-            var result = Lines.Parse(reader);
+            var result = Lines.Parse(textReader);
             if (result.Success)
             {
                 return result.Value;
@@ -227,15 +257,18 @@ namespace BassClefStudio.DbLanguage.Parser
         }
     }
 
+    /// <summary>
+    /// Represents an <see cref="Exception"/> thrown during <see cref="string"/>-to-token parsing.
+    /// </summary>
     public class ParseException : Exception
     {
-        public ParseException() { }
-        public ParseException(string message) : base(message) { }
-        public ParseException(string message, Exception inner) : base(message, inner) { }
+        internal ParseException() { }
+        internal ParseException(string message) : base(message) { }
+        internal ParseException(string message, Exception inner) : base(message, inner) { }
 
     }
 
-    public static class ParseExtensions
+    internal static class ParseExtensions
     {
         /// <summary>
         /// Creates a parser that runs the current parser and returns <typeparamref name="T3"/> as implemented interface or type <typeparamref name="T2"/>.

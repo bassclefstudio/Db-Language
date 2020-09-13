@@ -1,4 +1,4 @@
-﻿using BassClefStudio.DbLanguage.Parser;
+﻿using BassClefStudio.DbLanguage.Compiler.Parse;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
