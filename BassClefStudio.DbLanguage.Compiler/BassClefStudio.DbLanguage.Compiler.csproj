@@ -13,4 +13,8 @@
     <ProjectReference Include="..\BassClefStudio.DbLanguage.Core\BassClefStudio.DbLanguage.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Build\" />
+  </ItemGroup>
+
 </Project>

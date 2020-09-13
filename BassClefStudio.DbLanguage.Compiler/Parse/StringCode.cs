@@ -4,56 +4,56 @@ using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 
-namespace BassClefStudio.DbLanguage.Parser
+namespace BassClefStudio.DbLanguage.Compiler.Parse
 {
-    public interface ICode
+    internal interface ICode
     { }
-    public interface ICodeStatement : ICode
+    internal interface ICodeStatement : ICode
     { }
-    public interface ICodeValue : ICode
+    internal interface ICodeValue : ICode
     { }
-    public interface ICodeBoth : ICodeStatement, ICodeValue
+    internal interface ICodeBoth : ICodeStatement, ICodeValue
     { }
 
-    public class CodeValueStack : ICodeValue
+    internal class CodeValueStack : ICodeValue
     {
         public IEnumerable<ICodeValue> Values { get; set; }
     }
 
-    public class CodeStack : ICodeBoth
+    internal class CodeStack : ICodeBoth
     {
         public IEnumerable<ICodeValue> Values { get; set; }
         public ICodeBoth Statement => Values.LastOrDefault() as ICodeBoth;
     }
 
-    public class CodeVar : ICodeStatement
+    internal class CodeVar : ICodeStatement
     {
         public string Name { get; set; }
     }
 
-    public class CodeAdd : CodeVar, ICodeStatement
+    internal class CodeAdd : CodeVar, ICodeStatement
     {
         public string Type { get; set; }
     }
 
-    public class CodeGet : ICodeValue
+    internal class CodeGet : ICodeValue
     {
         public string Name { get; set; }
     }
 
-    public class CodeSet : ICodeStatement
+    internal class CodeSet : ICodeStatement
     {
         public string Path { get; set; }
         public ICodeValue Value { get; set; }
     }
 
-    public class CodeReturn : ICodeStatement
+    internal class CodeReturn : ICodeStatement
     {
         public ICodeValue Value { get; set; }
     }
 
 
-    public class CodeCall : ICodeBoth
+    internal class CodeCall : ICodeBoth
     {
         public IEnumerable<ICodeValue> Inputs { get; set; }
     }
