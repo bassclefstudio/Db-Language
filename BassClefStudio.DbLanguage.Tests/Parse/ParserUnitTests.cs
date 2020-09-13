@@ -9,7 +9,7 @@ namespace BassClefStudio.DbLanguage.Tests.Parse
     [TestClass]
     public static class ParserUnitTests
     {
-        public static DbLanguageParser Parser;
+        internal static DbLanguageParser Parser;
 
         [AssemblyInitialize]
         public static void Initialize(TestContext context)
