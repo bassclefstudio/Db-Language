@@ -37,6 +37,19 @@ namespace BassClefStudio.DbLanguage.Core.Data
         }
 
         /// <summary>
+        /// Creates a <see cref="DataContract"/> with the specified name and initializes properties and inheritance.
+        /// </summary>
+        /// <param name="typeName">The full namespace of the <see cref="DataContract"/>.</param>
+        /// <param name="properties">A collection of <see cref="MemoryProperty"/> objects included in this <see cref="DataContract"/>.</param>
+        /// <param name="inheritedContracts">A collection of parent <see cref="DataContract"/>s.</param>
+        public DataContract(Namespace typeName, IEnumerable<MemoryProperty> properties, IEnumerable<DataContract> inheritedContracts = null)
+        : this(typeName)
+        {
+            InheritedContracts.AddRange(inheritedContracts);
+            ContractProperties.AddRange(properties);
+        }
+
+        /// <summary>
         /// Gets a collection of <see cref="MemoryProperty"/> objects that <see cref="DataType"/>s inheriting this <see cref="DataContract"/> are expected to have. This only includes publicly visible properties.
         /// </summary>
         public IEnumerable<MemoryProperty> GetProperties()
