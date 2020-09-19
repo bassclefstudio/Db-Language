@@ -22,6 +22,17 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Info
         public string Key { get; }
 
         /// <summary>
+        /// Creates a <see cref="ScriptInput"/>.
+        /// </summary>
+        /// <param name="key">A <see cref="string"/>, unique to the <see cref="Script"/>, which names the input value.</param>
+        /// <param name="type">The required type that all values for this input must inherit from.</param>
+        public ScriptInput(string key, IType type)
+        {
+            Key = key;
+            Type = type;
+        }
+
+        /// <summary>
         /// Checks if a <see cref="MemoryItem"/> for this <see cref="ScriptInput"/> can be created with the given input <see cref="DataObject"/>.
         /// </summary>
         /// <param name="dataObject">The desired value of the <see cref="MemoryItem"/>.</param>

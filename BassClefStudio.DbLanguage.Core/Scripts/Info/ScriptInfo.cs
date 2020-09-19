@@ -23,14 +23,21 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Info
         public Namespace Namespace { get; }
 
         /// <summary>
+        /// The <see cref="IType"/> of objects returned from the parent <see cref="Script"/>.
+        /// </summary>
+        public IType ReturnType { get; }
+
+        /// <summary>
         /// Creates a new <see cref="ScriptInfo"/> object with a script name and collection of inputs.
         /// </summary>
         /// <param name="name">The name of the script.</param>
         /// <param name="inputs">A collection of <see cref="ScriptInput"/> values indicating the types and names of the inputs.</param>
-        public ScriptInfo(Namespace name, params ScriptInput[] inputs)
+        /// <param name="returnType">The <see cref="IType"/> of objects returned from the parent <see cref="Script"/>.</param>
+        public ScriptInfo(Namespace name, IType returnType, params ScriptInput[] inputs)
         {
             Namespace = name;
             Inputs = inputs;
+            ReturnType = returnType;
         }
 
         /// <summary>

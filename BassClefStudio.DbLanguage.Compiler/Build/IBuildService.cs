@@ -15,6 +15,7 @@ namespace BassClefStudio.DbLanguage.Compiler.Build
         /// Builds the tokenized library, applying type-checking, assigning values, and dynamically building memory and scripts.
         /// </summary>
         /// <param name="stringLib">A <see cref="StringLibrary"/> containing the tokenized form of the code.</param>
-        ILibrary Build(StringLibrary stringLib);
+        /// <param name="dependencies">A collection of already-built <see cref="ILibrary"/> objects that can be used for dependencies of this <paramref name="stringLib"/>.</param>
+        ILibrary Build(StringLibrary stringLib, IEnumerable<ILibrary> dependencies);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using BassClefStudio.DbLanguage.Core.Data;
+using BassClefStudio.DbLanguage.Core.Documentation;
 using BassClefStudio.DbLanguage.Core.Memory;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,11 @@ namespace BassClefStudio.DbLanguage.Core.Lifecycle
     /// </summary>
     public interface ILibrary
     {
+        /// <summary>
+        /// An overarching <see cref="Namespace"/> for the full <see cref="ILibrary"/> and included types.
+        /// </summary>
+        Namespace Name { get; }
+
         /// <summary>
         /// A collection of <see cref="ILibrary"/> objects which this <see cref="ILibrary"/> relies on.
         /// </summary>
