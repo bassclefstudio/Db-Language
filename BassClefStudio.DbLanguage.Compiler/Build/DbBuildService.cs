@@ -117,17 +117,34 @@ namespace BassClefStudio.DbLanguage.Compiler.Build
                     }
                     else if (child is StringScript stringScript)
                     {
-                        if (types.TryGetValue(stringScript.ReturnType, out var type))
+                        if (p.DbType is DataType dataType)
                         {
-                            IEnumerable<ScriptInput> inputs = stringScript.Inputs.Select(i => new ScriptInput(i.Name, types[i.Type]));
-                            ScriptInfo scriptInfo = new ScriptInfo(stringScript.Name, type, inputs.ToArray());
+                            if (types.TryGetValue(stringScript.ReturnType, out var type))
+                            {
+                                IEnumerable<ScriptInput> inputs = stringScript.Inputs.Select(i => new ScriptInput(i.Name, types[i.Type]));
+                                ScriptInfo scriptInfo = new ScriptInfo(stringScript.Name, type, inputs.ToArray());
 
-                            Func<DataObject, Script> scriptBuilder = 
-                                o => new Script(o, scriptInfo, BuildCommands(stringScript.Commands));
+                                Func<DataObject, Script> scriptBuilder =
+                                    o => new Script(o, scriptInfo, BuildCommands(stringScript.Commands));
+
+                                Func<DataObject, DataObject> createScriptObject =
+                                    me =>
+                                    {
+                                        var o = new DataObject(types["Core.Script"] as DataType);
+                                        o.TrySetObject<Script>(scriptBuilder(me));
+                                        return o;
+                                    };
+
+                                dataType.Constructors.Add(new SetCommand(stringScript.Name, new ValueCommand(createScriptObject)));
+                            }
+                            else
+                            {
+                                throw new BuildException($"Could not find return type {stringScript.ReturnType} for script {p.Name}.{child.Name}.");
+                            }
                         }
                         else
                         {
-                            throw new BuildException($"Could not find return type {stringScript.ReturnType} for script {p.Name}.{child.Name}.");
+                            throw new BuildException($"Only DataTypes may contain script blocks. (type: {p.Name})");
                         }
                     }
                     else
