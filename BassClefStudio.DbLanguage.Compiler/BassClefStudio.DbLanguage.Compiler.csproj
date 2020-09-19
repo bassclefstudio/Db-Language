@@ -3,6 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Authors>BassClefStudio</Authors>
+    <RepositoryUrl>https://github.com/bassclefstudio/Db-Language.git</RepositoryUrl>
+    <Description>BassClefStudio.DbLanguage is an interpreted programming language that runs on top of the .NET platform. This .Compiler package adds parse and build capabilities to the BassClefStudio.DbLanguage.Core package.</Description>
+    <Version>0.0.1-beta</Version>
   </PropertyGroup>
 
   <ItemGroup>
