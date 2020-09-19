@@ -9,7 +9,7 @@ namespace BassClefStudio.DbLanguage.Tests.Parse
     [TestClass]
     public class PropertyParseUnitTests
     {
-        internal DbLanguageParser Parser => ParserUnitTests.Parser;
+        internal DbParseService Parser => ParserUnitTests.Parser;
 
         #region Syntax
 

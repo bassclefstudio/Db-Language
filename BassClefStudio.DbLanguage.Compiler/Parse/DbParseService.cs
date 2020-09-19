@@ -11,9 +11,9 @@ using static Pidgin.Parser<char>;
 namespace BassClefStudio.DbLanguage.Compiler.Parse
 {
     /// <summary>
-    /// A parser based on the <see cref="Pidgin.Parser"/> framework that converts <see cref="string"/> code to a tokenized <see cref="StringLibrary"/>. Supports recursion and complex commands across the full Db language, along with exception support.
+    /// A parser based on the <see cref="Pidgin.Parser"/> framework that converts <see cref="string"/> code in the Db language to a tokenized <see cref="StringLibrary"/>. Supports recursion and complex commands across the full Db language, along with exception support.
     /// </summary>
-    internal class DbLanguageParser
+    internal class DbParseService : IParseService
     {
         private Parser<char, StringLibrary> LibraryParser { get; }
 
@@ -179,9 +179,9 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
         #endregion
 
         /// <summary>
-        /// Creates a new <see cref="DbLanguageParser"/>, initializing the language parsing frameworks.
+        /// Creates a new <see cref="DbParseService"/>, initializing the language parsing frameworks.
         /// </summary>
-        public DbLanguageParser()
+        public DbParseService()
         {
             InitStructures();
             InitCode();
@@ -190,15 +190,9 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
             InitLanguage();
         }
 
-        /// <summary>
-        /// Parses the code for a Db library (collection of types) into a <see cref="StringLibrary"/>.
-        /// </summary>
-        /// <param name="code">The <see cref="string"/> code.</param>
+        /// <inheritdoc/>
         public StringLibrary ParseLibrary(string code) => ParseLibrary(new StringReader(code));
-        /// <summary>
-        /// Parses the code for a Db library (collection of types) into a <see cref="StringLibrary"/>.
-        /// </summary>
-        /// <param name="textReader">A <see cref="TextReader"/> that can read a block of code.</param>
+        /// <inheritdoc/>
         public StringLibrary ParseLibrary(TextReader textReader)
         {
             var result = LibraryParser.Parse(textReader);

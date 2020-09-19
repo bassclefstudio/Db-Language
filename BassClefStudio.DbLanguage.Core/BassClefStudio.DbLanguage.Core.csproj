@@ -3,6 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Authors>BassClefStudio</Authors>
+    <Description>BassClefStudio.DbLanguage is an interpreted programming language that runs on top of the .NET platform. It provides cross-platform implementations of device-specific features (such as the file system, cameras, Bluetooth, etc.) through the use of an advanced Capabilities framework, as well as unified deployment and cross-app communication across platforms.</Description>
+    <RepositoryUrl>https://github.com/bassclefstudio/Db-Language.git</RepositoryUrl>
+    <Version>0.0.1-beta</Version>
   </PropertyGroup>
 
 </Project>
