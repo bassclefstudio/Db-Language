@@ -6,10 +6,10 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BassClefStudio.DbLanguage.Core.Runtime.Info
+namespace BassClefStudio.DbLanguage.Core.Runtime.Scripts
 {
     /// <summary>
-    /// Represents the metadata for a <see cref="Script"/>, including its <see cref="System.Documentation.Namespace"/> and the input <see cref="DataStructure"/>s.
+    /// Represents the metadata for a <see cref="Script"/>, including its <see cref="Namespace"/> and the input <see cref="IType"/>s.
     /// </summary>
     public class ScriptInfo
     {

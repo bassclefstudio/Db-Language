@@ -200,17 +200,29 @@ namespace BassClefStudio.DbLanguage.Core.Data
         #endregion
     }
 
+    /// <summary>
+    /// An <see cref="Exception"/> thrown when setting or creating memory properties for a type fails.
+    /// </summary>
     public class TypePropertyException : Exception
     {
+        /// <inheritdoc/>
         public TypePropertyException() { }
+        /// <inheritdoc/>
         public TypePropertyException(string message) : base(message) { }
+        /// <inheritdoc/>
         public TypePropertyException(string message, Exception inner) : base(message, inner) { }
     }
-
+    
+    /// <summary>
+    /// An <see cref="Exception"/> thrown when type binding to .NET encounters an error.
+    /// </summary>
     public class TypeBindingException : Exception
     {
+        /// <inheritdoc/>
         public TypeBindingException() { }
+        /// <inheritdoc/>
         public TypeBindingException(string message) : base(message) { }
+        /// <inheritdoc/>
         public TypeBindingException(string message, Exception inner) : base(message, inner) { }
     }
 }

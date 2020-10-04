@@ -9,8 +9,4 @@
     <Version>0.0.1-beta</Version>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Lifecycle\" />
-  </ItemGroup>
-
 </Project>

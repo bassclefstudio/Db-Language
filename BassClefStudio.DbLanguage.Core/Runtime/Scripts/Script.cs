@@ -1,7 +1,7 @@
 ﻿using BassClefStudio.DbLanguage.Core.Data;
 using BassClefStudio.DbLanguage.Core.Memory;
 using BassClefStudio.DbLanguage.Core.Runtime.Commands;
-using BassClefStudio.DbLanguage.Core.Runtime.Info;
+using BassClefStudio.DbLanguage.Core.Runtime.Core;
 using BassClefStudio.DbLanguage.Core.Runtime.Threading;
 using System;
 using System.Collections.Generic;
@@ -14,7 +14,7 @@ namespace BassClefStudio.DbLanguage.Core.Runtime.Scripts
     /// <summary>
     /// Represents a method that takes dynamic <see cref="DataObject"/>s of specified types as input, does a task, and returns a <see cref="DataObject"/> result.
     /// </summary>
-    public abstract class Script
+    public abstract class Script : ICapable
     {
         /// <summary>
         /// The <see cref="DataObject"/> that this <see cref="Script"/>, functioning as the <see cref="Script"/>'s context.
@@ -54,5 +54,10 @@ namespace BassClefStudio.DbLanguage.Core.Runtime.Scripts
         /// <param name="inputs">An <see cref="IWritableMemoryGroup"/> containing the named <see cref="Script"/> inputs.</param>
         /// <param name="capabilities">The <see cref="CapabilitiesCollection"/> from the <see cref="ICommand"/> or other source that called the <see cref="Script"/>.</param>
         protected abstract Task<DataObject> RunScriptInternalAsync(IWritableMemoryGroup inputs, CapabilitiesCollection capabilities);
+
+        /// <summary>
+        /// Retreives the collection of <see cref="Capability"/> objects (required and optional) for the <see cref="Script"/>.
+        /// </summary>
+        public abstract CapabilitiesCollection GetCapabilities();
     }
 }

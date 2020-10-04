@@ -1,7 +1,7 @@
 ﻿using BassClefStudio.DbLanguage.Core.Data;
 using BassClefStudio.DbLanguage.Core.Memory;
 using BassClefStudio.DbLanguage.Core.Runtime.Commands;
-using BassClefStudio.DbLanguage.Core.Runtime.Info;
+using BassClefStudio.DbLanguage.Core.Runtime.Core;
 using BassClefStudio.DbLanguage.Core.Runtime.Threading;
 using System;
 using System.Collections.Generic;
@@ -52,6 +52,12 @@ namespace BassClefStudio.DbLanguage.Core.Runtime.Scripts
             {
                 return null;
             }
+        }
+
+        /// <inheritdoc/>
+        public override CapabilitiesCollection GetCapabilities()
+        {
+            return new CapabilitiesCollection(Commands.Select(c => c.GetCapabilities()));
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using BassClefStudio.DbLanguage.Core.Data;
 using BassClefStudio.DbLanguage.Core.Memory;
 using BassClefStudio.DbLanguage.Core.Runtime.Commands;
-using BassClefStudio.DbLanguage.Core.Runtime.Info;
+using BassClefStudio.DbLanguage.Core.Runtime.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
