@@ -5,7 +5,7 @@ on:
     branches:
     - master
     paths:
-    - '**.nuspec'
+    - '**.csproj'
   workflow_dispatch:
 
 jobs:

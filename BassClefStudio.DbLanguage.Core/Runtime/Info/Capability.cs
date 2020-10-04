@@ -1,11 +1,11 @@
-﻿using BassClefStudio.DbLanguage.Core.Scripts.Commands;
-using BassClefStudio.DbLanguage.Core.Scripts.Threading;
+﻿using BassClefStudio.DbLanguage.Core.Runtime.Commands;
+using BassClefStudio.DbLanguage.Core.Runtime.Threading;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace BassClefStudio.DbLanguage.Core.Scripts.Info
+namespace BassClefStudio.DbLanguage.Core.Runtime.Info
 {
     /// <summary>
     /// Represents a collection of <see cref="Capability"/> values that grant a <see cref="Thread"/> capability to access <see cref="ICommand"/> commands.

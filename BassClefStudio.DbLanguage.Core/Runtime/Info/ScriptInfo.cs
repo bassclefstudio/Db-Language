@@ -1,11 +1,12 @@
 ﻿using BassClefStudio.DbLanguage.Core.Data;
 using BassClefStudio.DbLanguage.Core.Documentation;
 using BassClefStudio.DbLanguage.Core.Memory;
+using BassClefStudio.DbLanguage.Core.Runtime.Scripts;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BassClefStudio.DbLanguage.Core.Scripts.Info
+namespace BassClefStudio.DbLanguage.Core.Runtime.Info
 {
     /// <summary>
     /// Represents the metadata for a <see cref="Script"/>, including its <see cref="System.Documentation.Namespace"/> and the input <see cref="DataStructure"/>s.
