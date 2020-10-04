@@ -22,14 +22,21 @@ namespace BassClefStudio.DbLanguage.Core.Runtime.Scripts
         public IEnumerable<ICommand> Commands { get; }
 
         /// <summary>
+        /// A collection of any user-defined <see cref="Capability"/> values required to execute this <see cref="Script"/>.
+        /// </summary>
+        public CapabilitiesCollection AdditionalCapabilities { get; }
+
+        /// <summary>
         /// Creates a script inside of its parent <see cref="DataObject"/>, starting at a specific <see cref="ICommand"/> and containing script information and documentation.
         /// </summary>
         /// <param name="parent">The owning object of the script. This <see cref="DataObject"/> provides the memory context for the <see cref="Script"/>'s <see cref="Thread"/>.</param>
         /// <param name="info">Contains information about the name and inputs of the script.</param>
         /// <param name="commands">A collection of <see cref="ICommand"/> objects that make up a <see cref="Script"/>. They are run in this order on the <see cref="Thread"/> when the <see cref="Script"/> is called.</param>
-        public CommandScript(DataObject parent, ScriptInfo info, IEnumerable<ICommand> commands) : base(parent, info)
+        /// <param name="addedCapabilities">A collection of any user-defined <see cref="Capability"/> values required to execute this <see cref="Script"/>.</param>
+        public CommandScript(DataObject parent, ScriptInfo info, IEnumerable<ICommand> commands, CapabilitiesCollection addedCapabilities = null) : base(parent, info)
         {
             Commands = commands;
+            AdditionalCapabilities = addedCapabilities;
         }
 
         /// <inheritdoc/>
@@ -57,7 +64,14 @@ namespace BassClefStudio.DbLanguage.Core.Runtime.Scripts
         /// <inheritdoc/>
         public override CapabilitiesCollection GetCapabilities()
         {
-            return new CapabilitiesCollection(Commands.Select(c => c.GetCapabilities()));
+            if (AdditionalCapabilities != null)
+            {
+                return new CapabilitiesCollection(Commands.Select(c => c.GetCapabilities()).Concat(new CapabilitiesCollection[] { AdditionalCapabilities }));
+            }
+            else
+            {
+                return new CapabilitiesCollection(Commands.Select(c => c.GetCapabilities()));
+            }
         }
     }
 }
