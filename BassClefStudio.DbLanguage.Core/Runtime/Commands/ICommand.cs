@@ -15,11 +15,6 @@ namespace BassClefStudio.DbLanguage.Core.Runtime.Commands
     public interface ICommand
     {
         /// <summary>
-        /// A <see cref="CapabilitiesCollection"/> which contains all of the reuqired <see cref="Capability"/> objects a <see cref="Thread"/>'s <see cref="CapabilitiesCollection"/> object must have in order to run the command.
-        /// </summary>
-        CapabilitiesCollection RequiredCapabilities { get; }
-
-        /// <summary>
         /// Executes the command asynchronously.
         /// </summary>
         /// <param name="me">The owning <see cref="DataObject"/> making the call to the <see cref="ICommand"/>.</param>
@@ -37,7 +32,9 @@ namespace BassClefStudio.DbLanguage.Core.Runtime.Commands
         /// </summary>
         public DataObject ExceptionObject { get; }
 
+        /// <inheritdoc/>
         public CommandException(string message, DataObject exceptionObject  = null) : base(message) => ExceptionObject = exceptionObject;
+        /// <inheritdoc/>
         public CommandException(string message, Exception innerException, DataObject exceptionObject = null) : base(message, innerException) => ExceptionObject = exceptionObject;
     }
 }

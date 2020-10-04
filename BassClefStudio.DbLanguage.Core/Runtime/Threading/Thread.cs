@@ -21,7 +21,7 @@ namespace BassClefStudio.DbLanguage.Core.Runtime.Threading
         public string Name { get; }
 
         /// <summary>
-        /// A list of capabilities that this script has while running - only threads with required capabilities can run certain <see cref="ICommand"/> commands.
+        /// A list of capabilities that this script has while running - only threads with required capabilities can run certain code.
         /// </summary>
         public CapabilitiesCollection Capabilities { get; }
 
@@ -85,24 +85,9 @@ namespace BassClefStudio.DbLanguage.Core.Runtime.Threading
 
             while (!Pointer.IsStopped)
             {
-                if (Capabilities.CanAccess(Pointer.CurrentCommand.RequiredCapabilities))
-                {
-                    await Pointer.CurrentCommand.ExecuteCommandAsync(me, this);
-                    Pointer.Next();
-                }
-                else
-                {
-                    throw new CapabilityException($"Thread does not have the required capabilities to execute command. capabilities required:\r\n{string.Join(", ", Pointer.CurrentCommand.RequiredCapabilities.RequiredCapabilities.Select(p => p.ToString()))}");
-                }
+                await Pointer.CurrentCommand.ExecuteCommandAsync(me, this);
+                Pointer.Next();
             }
         }
-    }
-
-
-    public class ThreadException : Exception
-    {
-        public ThreadException() { }
-        public ThreadException(string message) : base(message) { }
-        public ThreadException(string message, Exception inner) : base(message, inner) { }
     }
 }
