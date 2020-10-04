@@ -1,13 +1,13 @@
 ﻿using BassClefStudio.DbLanguage.Core.Data;
-using BassClefStudio.DbLanguage.Core.Scripts.Info;
-using BassClefStudio.DbLanguage.Core.Scripts.Threading;
+using BassClefStudio.DbLanguage.Core.Runtime.Info;
+using BassClefStudio.DbLanguage.Core.Runtime.Threading;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
+namespace BassClefStudio.DbLanguage.Core.Runtime.Commands
 {
     /// <summary>
     /// Represents a TRY...CATCH command that can run an <see cref="ICommand"/> should a given <see cref="ICommand"/> throw an exception.

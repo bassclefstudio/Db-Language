@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BassClefStudio.DbLanguage.Core.Scripts.Info
+namespace BassClefStudio.DbLanguage.Core.Runtime.Info
 {
     /// <summary>
     /// Represents the input to a <see cref="Script"/>, contained in the <see cref="ScriptInfo"/> metadata, which is strongly-typed and keyed for the creation for an input <see cref="Memory.IWritableMemoryGroup"/> for the running <see cref="Threading.Thread"/>.

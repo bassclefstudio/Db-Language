@@ -1,14 +1,14 @@
 ﻿using BassClefStudio.DbLanguage.Core.Data;
 using BassClefStudio.DbLanguage.Core.Memory;
-using BassClefStudio.DbLanguage.Core.Scripts.Commands;
-using BassClefStudio.DbLanguage.Core.Scripts.Info;
+using BassClefStudio.DbLanguage.Core.Runtime.Commands;
+using BassClefStudio.DbLanguage.Core.Runtime.Info;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BassClefStudio.DbLanguage.Core.Scripts.Threading
+namespace BassClefStudio.DbLanguage.Core.Runtime.Threading
 {
     /// <summary>
     /// Represents a thread in the Db runtime, which is a dynamic series of <see cref="ICommand"/> objects that are executed by the runtime.

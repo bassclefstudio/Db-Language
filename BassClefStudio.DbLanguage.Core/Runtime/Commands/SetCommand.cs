@@ -1,13 +1,13 @@
 ﻿using BassClefStudio.DbLanguage.Core.Data;
 using BassClefStudio.DbLanguage.Core.Memory;
-using BassClefStudio.DbLanguage.Core.Scripts.Info;
-using BassClefStudio.DbLanguage.Core.Scripts.Threading;
+using BassClefStudio.DbLanguage.Core.Runtime.Info;
+using BassClefStudio.DbLanguage.Core.Runtime.Threading;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
+namespace BassClefStudio.DbLanguage.Core.Runtime.Commands
 {
     /// <summary>
     /// Represents a memory SET command that writes a value to the <see cref="IWritableMemoryStack"/>.

@@ -1,12 +1,12 @@
 ﻿using BassClefStudio.DbLanguage.Core.Data;
-using BassClefStudio.DbLanguage.Core.Scripts.Info;
-using BassClefStudio.DbLanguage.Core.Scripts.Threading;
+using BassClefStudio.DbLanguage.Core.Runtime.Info;
+using BassClefStudio.DbLanguage.Core.Runtime.Threading;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
+namespace BassClefStudio.DbLanguage.Core.Runtime.Commands
 {
     /// <summary>
     /// Represents a THROW command which throws a <see cref="CommandException"/> with an attached Db exception.
