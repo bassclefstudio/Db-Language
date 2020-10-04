@@ -1,6 +1,6 @@
 ﻿using BassClefStudio.DbLanguage.Core.Documentation;
 using BassClefStudio.DbLanguage.Core.Memory;
-using BassClefStudio.DbLanguage.Core.Scripts.Commands;
+using BassClefStudio.DbLanguage.Core.Runtime.Scripts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,7 +40,6 @@ namespace BassClefStudio.DbLanguage.Core.Data
         {
             TypeName = typeName;
             InheritedContracts = new List<DataContract>();
-            Constructors = new List<ICommand>();
         }
 
         /// <summary>
@@ -85,9 +84,9 @@ namespace BassClefStudio.DbLanguage.Core.Data
         #region Memory
 
         /// <summary>
-        /// A list of <see cref="ICommand"/>s that are run with a <see cref="DataObject"/> instance of the type when it is initialized.
+        /// A <see cref="Script"/> that is run on a <see cref="DataObject"/> instance of this <see cref="DataType"/> when it is initialized.
         /// </summary>
-        public List<ICommand> Constructors { get; }
+        public Script Constructor { get; }
 
         /// <summary>
         /// A list of <see cref="MemoryProperty"/> items that a <see cref="DataObject"/> of this <see cref="DataType"/> would publicly have available.

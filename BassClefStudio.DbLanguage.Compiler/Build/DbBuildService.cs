@@ -3,9 +3,8 @@ using BassClefStudio.DbLanguage.Core.Data;
 using BassClefStudio.DbLanguage.Core.Documentation;
 using BassClefStudio.DbLanguage.Core.Lifecycle;
 using BassClefStudio.DbLanguage.Core.Memory;
-using BassClefStudio.DbLanguage.Core.Scripts;
-using BassClefStudio.DbLanguage.Core.Scripts.Commands;
-using BassClefStudio.DbLanguage.Core.Scripts.Info;
+using BassClefStudio.DbLanguage.Core.Runtime.Info;
+using BassClefStudio.DbLanguage.Core.Runtime.Scripts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -121,21 +120,21 @@ namespace BassClefStudio.DbLanguage.Compiler.Build
                         {
                             if (types.TryGetValue(stringScript.ReturnType, out var type))
                             {
-                                IEnumerable<ScriptInput> inputs = stringScript.Inputs.Select(i => new ScriptInput(i.Name, types[i.Type]));
-                                ScriptInfo scriptInfo = new ScriptInfo(stringScript.Name, type, inputs.ToArray());
+                                //IEnumerable<ScriptInput> inputs = stringScript.Inputs.Select(i => new ScriptInput(i.Name, types[i.Type]));
+                                //ScriptInfo scriptInfo = new ScriptInfo(stringScript.Name, type, inputs.ToArray());
 
-                                Func<DataObject, Script> scriptBuilder =
-                                    o => new Script(o, scriptInfo, BuildCommands(stringScript.Commands));
+                                //Func<DataObject, Script> scriptBuilder =
+                                //    o => new Script(o, scriptInfo, BuildCommands(stringScript.Commands));
 
-                                Func<DataObject, DataObject> createScriptObject =
-                                    me =>
-                                    {
-                                        var o = new DataObject(types["Core.Script"] as DataType);
-                                        o.TrySetObject<Script>(scriptBuilder(me));
-                                        return o;
-                                    };
+                                //Func<DataObject, DataObject> createScriptObject =
+                                //    me =>
+                                //    {
+                                //        var o = new DataObject(types["Core.Script"] as DataType);
+                                //        o.TrySetObject<Script>(scriptBuilder(me));
+                                //        return o;
+                                //    };
 
-                                dataType.Constructors.Add(new SetCommand(stringScript.Name, new ValueCommand(createScriptObject)));
+                                //dataType.Constructors.Add(new SetCommand(stringScript.Name, new ValueCommand(createScriptObject)));
                             }
                             else
                             {
@@ -158,10 +157,10 @@ namespace BassClefStudio.DbLanguage.Compiler.Build
             return lib;
         }
 
-        private IEnumerable<ICommand> BuildCommands(IEnumerable<ICodeStatement> statements)
-        {
-            throw new NotImplementedException();
-        }
+        //private IEnumerable<ICommand> BuildCommands(IEnumerable<ICodeStatement> statements)
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 
     internal class TypeBuilder
