@@ -49,7 +49,7 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
                 inputs.Add(await task);
             }
 
-            return await script.CallScript(inputs, thread.Capabilities);
+            return await script.CallScriptAsync(inputs, thread.Capabilities);
         }
     }
 }

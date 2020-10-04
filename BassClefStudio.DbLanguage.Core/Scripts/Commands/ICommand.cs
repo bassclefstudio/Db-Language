@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace BassClefStudio.DbLanguage.Core.Scripts.Commands
 {
     /// <summary>
-    /// Represents one command that a <see cref="Thread"/> will run.
+    /// Represents a piece of code that has hard-coded native inputs when constructed. The most basic operation the Db runtime can evaluate. <see cref="ICommand"/>s are run directly on a <see cref="Thread"/>.
     /// </summary>
     public interface ICommand
     {

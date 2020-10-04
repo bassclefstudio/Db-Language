@@ -12,12 +12,12 @@ using System.Threading.Tasks;
 namespace BassClefStudio.DbLanguage.Core.Scripts
 {
     /// <summary>
-    /// Represents a script, a collection of <see cref="ICommand"/>s with information on the type and number of inputs, documentation, and a starting point for the <see cref="Thread"/>.
+    /// Represents a method that takes dynamic <see cref="DataObject"/>s of specified types as input, does a task, and returns a <see cref="DataObject"/> result.
     /// </summary>
-    public class Script
+    public abstract class Script
     {
         /// <summary>
-        /// The <see cref="DataObject"/> that provides the memory context for the script's <see cref="Thread"/> objects.
+        /// The <see cref="DataObject"/> that this <see cref="Script"/>, functioning as the <see cref="Script"/>'s context.
         /// </summary>
         public DataObject ParentObject { get; }
 
@@ -26,6 +26,41 @@ namespace BassClefStudio.DbLanguage.Core.Scripts
         /// </summary>
         public ScriptInfo ScriptInfo { get; }
 
+        /// <summary>
+        /// Creates a new <see cref="Script"/>.
+        /// </summary>
+        /// <param name="parent">The <see cref="DataObject"/> that this <see cref="Script"/>, functioning as the <see cref="Script"/>'s context.</param>
+        /// <param name="info">Contains information and documentation about the script, including its name and inputs.</param>
+        protected Script(DataObject parent, ScriptInfo info)
+        {
+            ParentObject = parent;
+            ScriptInfo = info;
+        }
+
+        /// <summary>
+        /// Calls and executes a given <see cref="Script"/> and returns the <see cref="DataObject"/> result.
+        /// </summary>
+        /// <param name="inputs">A collection of <see cref="DataObject"/>s which will be checked and stored in an <see cref="IWritableMemoryGroup"/> to be sent to the <see cref="Thread"/>'s <see cref="IMemoryStack"/>.</param>
+        /// <param name="inheritedcapabilities">The <see cref="CapabilitiesCollection"/> from the <see cref="ICommand"/> or other source that called the <see cref="Script"/>.</param>
+        public async Task<DataObject> CallScriptAsync(IEnumerable<DataObject> inputs, CapabilitiesCollection inheritedcapabilities)
+        {
+            IWritableMemoryGroup inputMemory = ScriptInfo.CreateMemoryFromInputs(inputs.ToArray());
+            return await RunScriptInternalAsync(inputMemory, inheritedcapabilities);
+        }
+
+        /// <summary>
+        /// Internal - runs the <see cref="Script"/> with the provided memory context and returns a <see cref="DataObject"/> result.
+        /// </summary>
+        /// <param name="inputs">An <see cref="IWritableMemoryGroup"/> containing the named <see cref="Script"/> inputs.</param>
+        /// <param name="capabilities">The <see cref="CapabilitiesCollection"/> from the <see cref="ICommand"/> or other source that called the <see cref="Script"/>.</param>
+        protected abstract Task<DataObject> RunScriptInternalAsync(IWritableMemoryGroup inputs, CapabilitiesCollection capabilities);
+    }
+
+    /// <summary>
+    /// A <see cref="Script"/> built on a collection of <see cref="ICommand"/>s that are run on a <see cref="Thread"/>.
+    /// </summary>
+    public class CommandScript : Script
+    {
         /// <summary>
         /// A collection of <see cref="ICommand"/> objects that make up a <see cref="Script"/>. They are run in this order on the <see cref="Thread"/> when the <see cref="Script"/> is called.
         /// </summary>
@@ -36,34 +71,27 @@ namespace BassClefStudio.DbLanguage.Core.Scripts
         /// </summary>
         /// <param name="parent">The owning object of the script. This <see cref="DataObject"/> provides the memory context for the <see cref="Script"/>'s <see cref="Thread"/>.</param>
         /// <param name="info">Contains information about the name and inputs of the script.</param>
-        public Script(DataObject parent, ScriptInfo info, IEnumerable<ICommand> commands)
+        /// <param name="commands">A collection of <see cref="ICommand"/> objects that make up a <see cref="Script"/>. They are run in this order on the <see cref="Thread"/> when the <see cref="Script"/> is called.</param>
+        public CommandScript(DataObject parent, ScriptInfo info, IEnumerable<ICommand> commands) : base(parent, info)
         {
-            ParentObject = parent;
-            ScriptInfo = info;
             Commands = commands;
         }
 
-        /// <summary>
-        /// Calls and executes a given <see cref="Script"/> on a new <see cref="Thread"/> and returns the <see cref="Thread"/>'s output object (if applicable).
-        /// </summary>
-        /// <param name="inputs">A collection of <see cref="DataObject"/>s which will be checked and stored in an <see cref="IWritableMemoryGroup"/> to be sent to the <see cref="Thread"/>'s <see cref="IMemoryStack"/>.</param>
-        /// <param name="inheritedcapabilities">The <see cref="CapabilitiesCollection"/> from the <see cref="ICommand"/> or other source that called the <see cref="Script"/>, which will be used for the <see cref="CapabilitiesCollection"/> of child <see cref="Thread"/>s.</param>
-        public async Task<DataObject> CallScript(IEnumerable<DataObject> inputs, CapabilitiesCollection inheritedcapabilities)
+        /// <inheritdoc/>
+        protected override async Task<DataObject> RunScriptInternalAsync(IWritableMemoryGroup inputs, CapabilitiesCollection capabilities)
         {
             var thread = new Thread(
                 ScriptInfo.GetUniqueId(),
-                inheritedcapabilities,
+                capabilities,
                 new ThreadPointer(Commands.ToArray()),
                 null);
-            //// TODO: Add context
 
-            IWritableMemoryGroup inputMemory = ScriptInfo.CreateMemoryFromInputs(inputs.ToArray());
-            await thread.RunThreadAsync(ParentObject, inputMemory);
+            await thread.RunThreadAsync(ParentObject, inputs);
 
             //// TODO: Make sure that this is the correct way to get the output of a script; handle flags such as no return and exception.
             if (thread.Pointer.Flags.HasFlag(CommandPointerFlags.Returned))
             {
-                return inputMemory.Get("return").Value;
+                return inputs.Get("return").Value;
             }
             else
             {
