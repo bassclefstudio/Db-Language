@@ -21,7 +21,7 @@ namespace BassClefStudio.DbLanguage.Core.Runtime.Scripts
         /// <summary>
         /// The name of the script, which should be a unique name within the containing <see cref="DataObject"/>.
         /// </summary>
-        public Namespace Namespace { get; }
+        public string Name { get; }
 
         /// <summary>
         /// The <see cref="IType"/> of objects returned from the parent <see cref="Script"/>.
@@ -34,9 +34,9 @@ namespace BassClefStudio.DbLanguage.Core.Runtime.Scripts
         /// <param name="name">The name of the script.</param>
         /// <param name="inputs">A collection of <see cref="ScriptInput"/> values indicating the types and names of the inputs.</param>
         /// <param name="returnType">The <see cref="IType"/> of objects returned from the parent <see cref="Script"/>.</param>
-        public ScriptInfo(Namespace name, IType returnType, params ScriptInput[] inputs)
+        public ScriptInfo(string name, IType returnType, params ScriptInput[] inputs)
         {
-            Namespace = name;
+            Name = name;
             Inputs = inputs;
             ReturnType = returnType;
         }
@@ -46,7 +46,7 @@ namespace BassClefStudio.DbLanguage.Core.Runtime.Scripts
         /// </summary>
         public string GetUniqueId()
         {
-            return $"{Namespace}_{Guid.NewGuid():N}";
+            return $"{Name}_{Guid.NewGuid():N}";
         }
 
         /// <summary>

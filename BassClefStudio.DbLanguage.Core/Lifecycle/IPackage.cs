@@ -1,4 +1,5 @@
 ﻿using BassClefStudio.DbLanguage.Core.Data;
+using BassClefStudio.DbLanguage.Core.Documentation;
 using BassClefStudio.DbLanguage.Core.Memory;
 using BassClefStudio.DbLanguage.Core.Runtime.Core;
 using System;
@@ -17,6 +18,11 @@ namespace BassClefStudio.DbLanguage.Core.Lifecycle
         /// A collection of <see cref="IType"/> objects described in this <see cref="IPackage"/>.
         /// </summary>
         IEnumerable<IType> DefinedTypes { get; }
+
+        /// <summary>
+        /// The name path for the given <see cref="IPackage"/>.
+        /// </summary>
+        Namespace Name { get; }
     }
 
     /// <summary>
