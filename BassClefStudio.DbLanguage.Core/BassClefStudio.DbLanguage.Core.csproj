@@ -10,4 +10,8 @@
     <PackageProjectUrl>https://github.com/bassclefstudio/Db-Language</PackageProjectUrl>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="BassClefStudio.NET.Core" Version="1.2.1" />
+  </ItemGroup>
+
 </Project>
