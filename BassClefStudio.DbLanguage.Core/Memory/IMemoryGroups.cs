@@ -67,7 +67,7 @@ namespace BassClefStudio.DbLanguage.Core.Memory
         /// <summary>
         /// Adds a layer to the top of the stack.
         /// </summary>
-        /// <param name="memoryGroup">The memory group to add.</param>
+        /// <param name="newLayer">The memory group to add.</param>
         /// <returns>A <see cref="bool"/> indicating whether the operation succeeded.</returns>
         bool Push(IMemoryGroup newLayer);
 
@@ -114,10 +114,10 @@ namespace BassClefStudio.DbLanguage.Core.Memory
         /// <returns><see cref="bool"/> value indicating the result of the check.</returns>
         public static bool ContainsPath(this IMemoryGroup group, Namespace path)
         {
-            if (group.ContainsKey(path.NameParts[0]))
+            if (group.ContainsKey(path.PathParts[0]))
             {
-                MemoryItem current = group.Get(path.NameParts[0]);
-                foreach (var part in path.NameParts.Skip(1))
+                MemoryItem current = group.Get(path.PathParts[0]);
+                foreach (var part in path.PathParts.Skip(1))
                 {
                     if (current.Value.ContainsKey(part))
                     {
@@ -145,8 +145,8 @@ namespace BassClefStudio.DbLanguage.Core.Memory
         /// <returns>The <see cref="MemoryItem"/> property value.</returns>
         public static MemoryItem GetPath(this IMemoryGroup group, Namespace path)
         {
-            MemoryItem current = group.Get(path.NameParts[0]);
-            foreach (var part in path.NameParts.Skip(1))
+            MemoryItem current = group.Get(path.PathParts[0]);
+            foreach (var part in path.PathParts.Skip(1))
             {
                 current = current.Value.Get(part);
             }
@@ -162,12 +162,12 @@ namespace BassClefStudio.DbLanguage.Core.Memory
         /// <returns>A <see cref="bool"/> indicating whether the operation succeeded.</returns>
         public static bool SetPath(this IMemoryGroup group, Namespace path, DataObject value)
         {
-            MemoryItem current = group.Get(path.NameParts[0]);
-            foreach (var part in path.NameParts.Skip(1).Take(path.NameParts.Length - 2))
+            MemoryItem current = group.Get(path.PathParts[0]);
+            foreach (var part in path.PathParts.Skip(1).Take(path.PathParts.Length - 2))
             {
                 current = current.Value.Get(part);
             }
-            return current.Value.Set(path.NameParts.Last(), value);
+            return current.Value.Set(path.PathParts.Last(), value);
         }
     }
 }
