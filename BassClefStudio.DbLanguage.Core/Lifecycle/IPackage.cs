@@ -88,6 +88,12 @@ namespace BassClefStudio.DbLanguage.Core.Lifecycle
             return obj is PackageInfo info
                 && this == info;
         }
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 
 

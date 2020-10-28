@@ -6,6 +6,9 @@ using System.Text;
 
 namespace BassClefStudio.DbLanguage.Core.Memory
 {
+    /// <summary>
+    /// Represnts an <see cref="IMemoryGroup"/> which is the sum of a collection of <see cref="LinkedGroups"/>, containing the properties of each child <see cref="IMemoryGroup"/>.
+    /// </summary>
     public class LinkedMemoryGroup : IMemoryGroup
     {
         /// <summary>
@@ -56,6 +59,9 @@ namespace BassClefStudio.DbLanguage.Core.Memory
         }
     }
 
+    /// <summary>
+    /// Represents a <see cref="LinkedMemoryGroup"/> where <see cref="MemoryItem"/>s can be written to an additional <see cref="IMemoryGroup"/> in the collection through the <see cref="IWritableMemoryGroup"/> interface methods.
+    /// </summary>
     public class WritableLinkedMemoryGroup : LinkedMemoryGroup, IWritableMemoryGroup
     {
         /// <summary>

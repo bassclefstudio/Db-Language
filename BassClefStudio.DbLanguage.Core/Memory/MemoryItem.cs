@@ -10,6 +10,9 @@ namespace BassClefStudio.DbLanguage.Core.Memory
     /// </summary>
     public class MemoryItem
     {
+        /// <summary>
+        /// A <see cref="MemoryProperty"/> item describing the access to and type of this <see cref="MemoryItem"/>.
+        /// </summary>
         public MemoryProperty Property { get; }
 
         /// <summary>

@@ -65,10 +65,16 @@ namespace BassClefStudio.DbLanguage.Core.Runtime.Scripts
         }
     }
 
+    /// <summary>
+    /// An <see cref="Exception"/> thrown when issues arise in the inputs for a <see cref="Script"/>.
+    /// </summary>
     public class ScriptInputException : Exception
     {
+        /// <inheritdoc/>
         public ScriptInputException() { }
+        /// <inheritdoc/>
         public ScriptInputException(string message) : base(message) { }
+        /// <inheritdoc/>
         public ScriptInputException(string message, Exception inner) : base(message, inner) { }
     }
 }

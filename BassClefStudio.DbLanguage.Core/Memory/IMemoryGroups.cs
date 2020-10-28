@@ -21,7 +21,7 @@ namespace BassClefStudio.DbLanguage.Core.Memory
         /// <summary>
         /// Sets the data store of this <see cref="MemoryItem"/> to a new <see cref="DataObject"/>.
         /// </summary>
-        /// <param name="value">The value to set. The <paramref name="value"/> must have a <see cref="BassClefStudio.DbLanguage.Core.Data.DataObject.DataType"/> that inherits from or is the <see cref="MemoryItem.DataType"/>.</param>
+        /// <param name="value">The value to set. The <paramref name="value"/> must have a <see cref="DataObject.DataType"/> that inherits from or is the <see cref="MemoryProperty.Type"/>.</param>
         /// <param name="key">The unique identifier for the memory item.</param>
         /// <returns>A <see cref="bool"/> representing whether the operation was a success.</returns>
         bool Set(string key, DataObject value);
@@ -89,6 +89,9 @@ namespace BassClefStudio.DbLanguage.Core.Memory
     {
     }
 
+    /// <summary>
+    /// Represents extension methods to the <see cref="IMemoryGroup"/> and related types.
+    /// </summary>
     public static class MemoryExtensions
     {
         /// <summary>
@@ -158,7 +161,7 @@ namespace BassClefStudio.DbLanguage.Core.Memory
         /// </summary>
         /// <param name="group">The base memory group.</param>
         /// <param name="path">The dot-delimited path to the desired <see cref="MemoryItem"/>.</param>
-        /// <param name="value">The value to set. The <paramref name="value"/> must have a <see cref="BassClefStudio.DbLanguage.Core.Data.DataObject.DataType"/> that inherits from or is the <see cref="MemoryItem.DataType"/>.</param>
+        /// <param name="value">The value to set. The <paramref name="value"/> must have a <see cref="BassClefStudio.DbLanguage.Core.Data.DataObject.DataType"/> that inherits from or is the <see cref="MemoryProperty.Type"/>.</param>
         /// <returns>A <see cref="bool"/> indicating whether the operation succeeded.</returns>
         public static bool SetPath(this IMemoryGroup group, Namespace path, DataObject value)
         {

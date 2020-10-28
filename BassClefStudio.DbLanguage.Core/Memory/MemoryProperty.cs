@@ -1,4 +1,5 @@
 ﻿using BassClefStudio.DbLanguage.Core.Data;
+using BassClefStudio.DbLanguage.Core.Runtime.Threading;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,9 @@ namespace BassClefStudio.DbLanguage.Core.Memory
     /// </summary>
     public class MemoryProperty
     {
+        /// <summary>
+        /// The default <see cref="PropertyFlags"/> that populate <see cref="MemoryProperty.Flags"/>.
+        /// </summary>
         public const PropertyFlags DefaultFlags = PropertyFlags.Get | PropertyFlags.Set;
 
         /// <summary>
@@ -45,17 +49,26 @@ namespace BassClefStudio.DbLanguage.Core.Memory
             Flags = flags;
         }
 
+        /// <inheritdoc/>
         public static bool operator ==(MemoryProperty a, MemoryProperty b)
         {
             return a.Key == b.Key;
         }
 
+        /// <inheritdoc/>
         public static bool operator !=(MemoryProperty a, MemoryProperty b)
         => !(a == b);
 
+        /// <inheritdoc/>
         public override bool Equals(object obj)
         {
             return obj is MemoryProperty property && this == property;
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
     }
 
@@ -64,6 +77,11 @@ namespace BassClefStudio.DbLanguage.Core.Memory
     /// </summary>
     public static class PropertyExtensions
     {
+        /// <summary>
+        /// Returns a selection of the given <see cref="MemoryProperty"/>s where the <see cref="PropertyFlags.Static"/> flag is either set or unset (depending on the <paramref name="isStatic"/> <see cref="bool"/>).
+        /// </summary>
+        /// <param name="properties">This given collection of <see cref="MemoryProperty"/>s.</param>
+        /// <param name="isStatic">A <see cref="bool"/> indicating whether the returned properties should be static or not.</param>
         public static IEnumerable<MemoryProperty> GetForStatic(this IEnumerable<MemoryProperty> properties, bool isStatic)
         {
             return properties.Where(p => p.Flags.HasFlag(PropertyFlags.Static) == isStatic);
@@ -92,7 +110,7 @@ namespace BassClefStudio.DbLanguage.Core.Memory
         Static = 4,
 
         /// <summary>
-        /// Indicates that the memory is part of the scope of an internal <see cref="Scripts.Threading.Thread"/> and is used for local variables.
+        /// Indicates that the memory is part of the scope of an internal <see cref="Thread"/> and is used for local variables.
         /// </summary>
         Scoped = 8
     }

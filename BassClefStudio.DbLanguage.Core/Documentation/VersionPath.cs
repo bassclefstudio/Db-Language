@@ -122,6 +122,12 @@ namespace BassClefStudio.DbLanguage.Core.Documentation
                 && this == v;
         }
 
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
         #endregion
     }
 }
