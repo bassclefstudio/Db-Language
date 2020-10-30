@@ -119,7 +119,7 @@ namespace BassClefStudio.DbLanguage.Core.Data
 
             //// Get any properties that have duplicate paths.
             var allProperties = PublicProperties.Concat(PrivateProperties);
-            var duplicates = allProperties.Where(p => allProperties.Count(a => a == p) > 1);
+            var duplicates = allProperties.Where(p => allProperties.Count(a => a.Key == p.Key) > 1);
             if (duplicates.Any())
             {
                 throw new TypePropertyException($"One or more property keys are used more than once in the same enclosing type {this.TypeName}: {string.Join(",", duplicates.Select(d => d.Key).Distinct())}.");

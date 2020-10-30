@@ -76,7 +76,7 @@ namespace BassClefStudio.DbLanguage.Core.Memory
         /// <inheritdoc/>
         public bool Add(MemoryItem item)
         {
-            if (ContainsKey(item.Property))
+            if (Items.Any(i => i.Property.Key == item.Property.Key))
             {
                 return false;
             }
