@@ -26,16 +26,27 @@ namespace BassClefStudio.DbLanguage.Core.Data
         public List<DataContract> InheritedContracts { get; }
 
         /// <summary>
-        /// Creates a basic <see cref="DataContract"/> with a type name, a collection of <see cref="MemoryProperty"/> properties, and a collection of <see cref="DataContract"/> parents.
+        /// Creates a <see cref="DataContract"/> with the specified name.
         /// </summary>
         /// <param name="typeName">The full namespace of the <see cref="DataContract"/>.</param>
-        /// <param name="properties">The list of <see cref="MemoryProperty"/> objects for inheriting types that the <see cref="DataContract"/> specifies.</param>
-        /// <param name="parents">A collection of <see cref="DataContract"/> parents that also provide <see cref="MemoryProperty"/> objects to inheriting types.</param>
-        public DataContract(Namespace typeName, IEnumerable<MemoryProperty> properties, IEnumerable<DataContract> parents)
+        public DataContract(Namespace typeName)
         {
             TypeName = typeName;
-            ContractProperties = new List<MemoryProperty>(properties);
-            InheritedContracts = new List<DataContract>(parents);
+            InheritedContracts = new List<DataContract>();
+            ContractProperties = new List<MemoryProperty>();
+        }
+
+        /// <summary>
+        /// Creates a <see cref="DataContract"/> with the specified name and initializes properties and inheritance.
+        /// </summary>
+        /// <param name="typeName">The full namespace of the <see cref="DataContract"/>.</param>
+        /// <param name="properties">A collection of <see cref="MemoryProperty"/> objects included in this <see cref="DataContract"/>.</param>
+        /// <param name="inheritedContracts">A collection of parent <see cref="DataContract"/>s.</param>
+        public DataContract(Namespace typeName, IEnumerable<MemoryProperty> properties, IEnumerable<DataContract> inheritedContracts = null)
+        : this(typeName)
+        {
+            InheritedContracts.AddRange(inheritedContracts);
+            ContractProperties.AddRange(properties);
         }
 
         /// <summary>

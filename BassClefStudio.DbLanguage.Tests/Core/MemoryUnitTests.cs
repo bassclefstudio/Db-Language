@@ -51,7 +51,7 @@ namespace BassClefStudio.DbLanguage.Tests.Core
         {
             MemoryItem testItem = new MemoryItem(new MemoryProperty("Prop", TestType));
             var o = new DataObject(TestType);
-            Assert.IsTrue(testItem.Set(o), "Set operation failed.");
+            testItem.Set(o);
             Assert.AreEqual(o, testItem.Value, "Value failed to store in memory.");
         }
 
@@ -60,7 +60,7 @@ namespace BassClefStudio.DbLanguage.Tests.Core
         {
             MemoryItem testItem = new MemoryItem(new MemoryProperty("Prop", TestType));
             var o = new DataObject(AnotherTestType);
-            Assert.IsFalse(testItem.Set(o), "Set operation should not have succeeded with incorrect type.");
+            Assert.ThrowsException<MemoryException>(() => testItem.Set(o), "Set operation should not have succeeded with incorrect type.");
             Assert.AreNotEqual(o, testItem.Value, "Value was incorrectly stored in memory.");
         }
 

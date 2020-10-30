@@ -6,7 +6,8 @@
     <Authors>BassClefStudio</Authors>
     <RepositoryUrl>https://github.com/bassclefstudio/Db-Language.git</RepositoryUrl>
     <Description>BassClefStudio.DbLanguage is an interpreted programming language that runs on top of the .NET platform. This .Compiler package adds parse and build capabilities to the BassClefStudio.DbLanguage.Core package.</Description>
-    <Version>0.0.1-beta</Version>
+    <Version>0.0.2-beta</Version>
+    <PackageProjectUrl>https://github.com/bassclefstudio/Db-Language</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>

@@ -70,49 +70,49 @@ namespace BassClefStudio.DbLanguage.Core.Memory
         }
 
         /// <inheritdoc/>
-        public string[] GetKeys()
+        public MemoryProperty[] GetKeys()
         {
             return Layers.SelectMany(l => l.GetKeys()).ToArray();
         }
 
         /// <inheritdoc/>
-        public bool ContainsKey(string key)
+        public bool ContainsKey(MemoryProperty property)
         {
-            return GetKeys().Contains(key);
+            return GetKeys().Contains(property);
         }
 
         /// <summary>
         /// Internal - gets the group in <see cref="Layers"/> that contains the specified key.
         /// </summary>
-        /// <param name="key">The unique identifier for the memory item.</param>
-        private IMemoryGroup GetGroupFor(string key)
+        /// <param name="property">The <see cref="MemoryProperty"/> identifying the memory item.</param>
+        private IMemoryGroup GetGroupFor(MemoryProperty property)
         {
-            return Layers.First(l => l.ContainsKey(key));
+            return Layers.First(l => l.ContainsKey(property));
         }
 
         /// <inheritdoc/>
-        public MemoryItem Get(string key)
+        public MemoryItem Get(MemoryProperty property)
         {
-            return GetGroupFor(key).Get(key);
+            return GetGroupFor(property).Get(property);
         }
 
         /// <inheritdoc/>
-        public bool Set(string key, DataObject value)
+        public void Set(MemoryProperty property, DataObject value)
         {
-            if(ContainsKey(key))
+            if(ContainsKey(property))
             {
-                return GetGroupFor(key).Set(key, value);
+                GetGroupFor(property).Set(property, value);
             }
             else
             {
-                return false;
+                throw new MemoryException($"Attempted to set the value of property {property.Key} which does not exist in this MemoryStack.");
             }
         }
 
         /// <inheritdoc/>
         public bool Add(MemoryItem item)
         {
-            if (ContainsKey(item.Property.Key) || WritableLayer == null)
+            if (ContainsKey(item.Property) || WritableLayer == null)
             {
                 return false;
             }

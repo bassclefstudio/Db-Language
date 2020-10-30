@@ -1,14 +1,15 @@
 ﻿using BassClefStudio.DbLanguage.Core.Data;
 using BassClefStudio.DbLanguage.Core.Documentation;
 using BassClefStudio.DbLanguage.Core.Memory;
+using BassClefStudio.DbLanguage.Core.Runtime.Scripts;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BassClefStudio.DbLanguage.Core.Scripts.Info
+namespace BassClefStudio.DbLanguage.Core.Runtime.Scripts
 {
     /// <summary>
-    /// Represents the metadata for a <see cref="Script"/>, including its <see cref="System.Documentation.Namespace"/> and the input <see cref="DataStructure"/>s.
+    /// Represents the metadata for a <see cref="Script"/>, including its <see cref="Namespace"/> and the input <see cref="IType"/>s.
     /// </summary>
     public class ScriptInfo
     {
@@ -20,17 +21,24 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Info
         /// <summary>
         /// The name of the script, which should be a unique name within the containing <see cref="DataObject"/>.
         /// </summary>
-        public Namespace Namespace { get; }
+        public string Name { get; }
+
+        /// <summary>
+        /// The <see cref="IType"/> of objects returned from the parent <see cref="Script"/>.
+        /// </summary>
+        public IType ReturnType { get; }
 
         /// <summary>
         /// Creates a new <see cref="ScriptInfo"/> object with a script name and collection of inputs.
         /// </summary>
         /// <param name="name">The name of the script.</param>
         /// <param name="inputs">A collection of <see cref="ScriptInput"/> values indicating the types and names of the inputs.</param>
-        public ScriptInfo(Namespace name, params ScriptInput[] inputs)
+        /// <param name="returnType">The <see cref="IType"/> of objects returned from the parent <see cref="Script"/>.</param>
+        public ScriptInfo(string name, IType returnType, params ScriptInput[] inputs)
         {
-            Namespace = name;
+            Name = name;
             Inputs = inputs;
+            ReturnType = returnType;
         }
 
         /// <summary>
@@ -38,7 +46,7 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Info
         /// </summary>
         public string GetUniqueId()
         {
-            return $"{Namespace}_{Guid.NewGuid():N}";
+            return $"{Name}_{Guid.NewGuid():N}";
         }
 
         /// <summary>

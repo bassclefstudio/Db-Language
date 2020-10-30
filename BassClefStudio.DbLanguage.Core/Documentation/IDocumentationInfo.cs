@@ -15,12 +15,12 @@ namespace BassClefStudio.DbLanguage.Core.Documentation
         Namespace Namespace { get; }
 
         /// <summary>
-        /// Returns the human-readable documentation for this <see cref="IDocumentable"/> in Markdown format (see https://commonmark.org/help/ for more information).
+        /// Returns the human-readable documentation for this object in Markdown format (see https://commonmark.org/help/ for more information).
         /// </summary>
         string GetMarkdownDocumentation();
 
         /// <summary>
-        /// Returns the human-readable documentation for this <see cref="IDocumentable"/> but in plain text. For a formatted version of the documentation, see <seealso cref="GetMarkdownDocumentation"/>.
+        /// Returns the human-readable documentation for this object, but in plain text. For a formatted version of the documentation, see <seealso cref="GetMarkdownDocumentation"/>.
         /// </summary>
         string GetPlainTextDocumentation();
     }

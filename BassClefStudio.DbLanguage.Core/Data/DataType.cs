@@ -1,5 +1,6 @@
 ﻿using BassClefStudio.DbLanguage.Core.Documentation;
 using BassClefStudio.DbLanguage.Core.Memory;
+using BassClefStudio.DbLanguage.Core.Runtime.Scripts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,36 +27,75 @@ namespace BassClefStudio.DbLanguage.Core.Data
         /// <summary>
         /// The parent <see cref="DataType"/> of this <see cref="DataType"/>, from which this type inherits all properties and fulfilled <see cref="DataContract"/>s.
         /// </summary>
-        public DataType ParentType { get; }
+        public DataType ParentType { get; set; }
 
         #endregion
-        #region Initialize
+        #region Constructor
 
-        public DataType(Namespace typeName, IEnumerable<MemoryProperty> publicProperties, IEnumerable<MemoryProperty> privateProperties, IEnumerable<DataContract> contracts = null, DataType parentType = null)
+        /// <summary>
+        /// Creates a new <see cref="DataType"/> with the given name.
+        /// </summary>
+        /// <param name="typeName">The name of the <see cref="DataType"/>.</param>
+        public DataType(Namespace typeName)
         {
             TypeName = typeName;
+            InheritedContracts = new List<DataContract>();
+        }
 
-            InheritedContracts = contracts == null ? new List<DataContract>() : new List<DataContract>(contracts);
+        /// <summary>
+        /// Creates a <see cref="DataType"/> and initializes properties and inheritance.
+        /// </summary>
+        /// <param name="typeName">The name of the <see cref="DataType"/>.</param>
+        /// <param name="publicProperties">A collection of <see cref="MemoryProperty"/> items that a <see cref="DataObject"/> of this <see cref="DataType"/> would publicly have available.</param>
+        /// <param name="privateProperties">A collection of <see cref="MemoryProperty"/> items that a <see cref="DataObject"/> of this <see cref="DataType"/> would privately have available.</param>
+        /// <param name="inheritedContracts">A collection of <see cref="DataContract"/>s that this <see cref="DataType"/> supports.</param>
+        /// <param name="parentType">The parent <see cref="DataType"/> of this <see cref="DataType"/>, from which this type inherits all properties and fulfilled <see cref="DataContract"/>s.</param>
+        public DataType(Namespace typeName, IEnumerable<MemoryProperty> publicProperties, IEnumerable<MemoryProperty> privateProperties, IEnumerable<DataContract> inheritedContracts = null, DataType parentType = null)
+        : this(typeName)
+        {
+            if (inheritedContracts != null)
+            {
+                InheritedContracts.AddRange(inheritedContracts);
+            }
             ParentType = parentType;
 
             InitializeProperties(publicProperties, privateProperties);
         }
 
-        public DataType(Namespace typeName, Type boundType, IEnumerable<MemoryProperty> publicProperties, IEnumerable<MemoryProperty> privateProperties, IEnumerable<DataContract> contracts = null, DataType parentType = null)
-            : this(typeName, publicProperties, privateProperties, contracts, parentType)
+        /// <summary>
+        /// Creates a <see cref="DataType"/> and initializes properties and inheritance.
+        /// </summary>
+        /// <param name="typeName">The name of the <see cref="DataType"/>.</param>
+        /// <param name="boundType">.NET objects that are binded to a <see cref="DataObject"/> can be type-bound to a <see cref="DataType"/> by using the <see cref="BoundType"/> property. All binded objects in <see cref="DataObject"/>s of this <see cref="DataType"/> must inherit from this .NET <see cref="Type"/>.</param>
+        /// <param name="publicProperties">A collection of <see cref="MemoryProperty"/> items that a <see cref="DataObject"/> of this <see cref="DataType"/> would publicly have available.</param>
+        /// <param name="privateProperties">A collection of <see cref="MemoryProperty"/> items that a <see cref="DataObject"/> of this <see cref="DataType"/> would privately have available.</param>
+        /// <param name="inheritedContracts">A collection of <see cref="DataContract"/>s that this <see cref="DataType"/> supports.</param>
+        /// <param name="parentType">The parent <see cref="DataType"/> of this <see cref="DataType"/>, from which this type inherits all properties and fulfilled <see cref="DataContract"/>s.</param>
+        public DataType(Namespace typeName, Type boundType, IEnumerable<MemoryProperty> publicProperties, IEnumerable<MemoryProperty> privateProperties, IEnumerable<DataContract> inheritedContracts = null, DataType parentType = null)
+        : this(typeName, publicProperties, privateProperties, inheritedContracts, parentType)
         {
-            BoundType = boundType;
-            if (HasTypeBinding)
+            if (boundType != null)
             {
-                boundTypeInfo = BoundType.GetTypeInfo();
+                InitializeTypeBinding(boundType);
             }
         }
 
         #endregion
         #region Memory
 
+        /// <summary>
+        /// A <see cref="Script"/> that is run on a <see cref="DataObject"/> instance of this <see cref="DataType"/> when it is initialized.
+        /// </summary>
+        public Script Constructor { get; }
+
+        /// <summary>
+        /// A list of <see cref="MemoryProperty"/> items that a <see cref="DataObject"/> of this <see cref="DataType"/> would publicly have available.
+        /// </summary>
         public List<MemoryProperty> PublicProperties { get; private set; }
 
+        /// <summary>
+        /// A list of <see cref="MemoryProperty"/> items that a <see cref="DataObject"/> of this <see cref="DataType"/> would privately have available.
+        /// </summary>
         public List<MemoryProperty> PrivateProperties { get; private set; }
 
         /// <summary>
@@ -63,7 +103,7 @@ namespace BassClefStudio.DbLanguage.Core.Data
         /// </summary>
         /// <param name="newPublic">The new public <see cref="MemoryProperty"/> objects to add to the <see cref="DataType"/>.</param>
         /// <param name="newPrivate">The new private <see cref="MemoryProperty"/> objects to add to the <see cref="DataType"/>.</param>
-        private void InitializeProperties(IEnumerable<MemoryProperty> newPublic, IEnumerable<MemoryProperty> newPrivate)
+        public void InitializeProperties(IEnumerable<MemoryProperty> newPublic, IEnumerable<MemoryProperty> newPrivate)
         {
             PublicProperties = new List<MemoryProperty>();
             PrivateProperties = new List<MemoryProperty>();
@@ -79,7 +119,7 @@ namespace BassClefStudio.DbLanguage.Core.Data
 
             //// Get any properties that have duplicate paths.
             var allProperties = PublicProperties.Concat(PrivateProperties);
-            var duplicates = allProperties.Where(p => allProperties.Count(a => a == p) > 1);
+            var duplicates = allProperties.Where(p => allProperties.Count(a => a.Key == p.Key) > 1);
             if (duplicates.Any())
             {
                 throw new TypePropertyException($"One or more property keys are used more than once in the same enclosing type {this.TypeName}: {string.Join(",", duplicates.Select(d => d.Key).Distinct())}.");
@@ -102,9 +142,9 @@ namespace BassClefStudio.DbLanguage.Core.Data
         public bool HasTypeBinding => BoundType != null;
 
         /// <summary>
-        /// .NET objects that are binded to a <see cref="DataObject"/> can be type-bound to a <see cref="DataType"/> by using the <see cref="BindedType"/> property. All binded objects in <see cref="DataObject"/>s of this <see cref="DataType"/> must inherit from this .NET <see cref="Type"/>.
+        /// .NET objects that are binded to a <see cref="DataObject"/> can be type-bound to a <see cref="DataType"/> by using the <see cref="BoundType"/> property. All binded objects in <see cref="DataObject"/>s of this <see cref="DataType"/> must inherit from this .NET <see cref="Type"/>.
         /// </summary>
-        public Type BoundType { get; }
+        public Type BoundType { get; private set; }
 
         /// <summary>
         /// Stores type information about the <see cref="BoundType"/> for use in reflection (see <see cref="IsBoundType(Type)"/>).
@@ -118,6 +158,19 @@ namespace BassClefStudio.DbLanguage.Core.Data
         public bool IsBoundType(Type t)
         {
             return t.GetTypeInfo().IsAssignableFrom(boundTypeInfo);
+        }
+
+        /// <summary>
+        /// Initializes type binding with the given type, setting up required type info for binding to be successful.
+        /// </summary>
+        /// <param name="boundType">See <see cref="BoundType"/>.</param>
+        public void InitializeTypeBinding(Type boundType)
+        {
+            BoundType = boundType;
+            if (HasTypeBinding)
+            {
+                boundTypeInfo = BoundType.GetTypeInfo();
+            }
         }
 
         #endregion
@@ -147,17 +200,29 @@ namespace BassClefStudio.DbLanguage.Core.Data
         #endregion
     }
 
+    /// <summary>
+    /// An <see cref="Exception"/> thrown when setting or creating memory properties for a type fails.
+    /// </summary>
     public class TypePropertyException : Exception
     {
+        /// <inheritdoc/>
         public TypePropertyException() { }
+        /// <inheritdoc/>
         public TypePropertyException(string message) : base(message) { }
+        /// <inheritdoc/>
         public TypePropertyException(string message, Exception inner) : base(message, inner) { }
     }
-
+    
+    /// <summary>
+    /// An <see cref="Exception"/> thrown when type binding to .NET encounters an error.
+    /// </summary>
     public class TypeBindingException : Exception
     {
+        /// <inheritdoc/>
         public TypeBindingException() { }
+        /// <inheritdoc/>
         public TypeBindingException(string message) : base(message) { }
+        /// <inheritdoc/>
         public TypeBindingException(string message, Exception inner) : base(message, inner) { }
     }
 }

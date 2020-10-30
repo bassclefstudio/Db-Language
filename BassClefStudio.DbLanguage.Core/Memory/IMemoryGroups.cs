@@ -13,31 +13,31 @@ namespace BassClefStudio.DbLanguage.Core.Memory
     public interface IMemoryGroup
     {
         /// <summary>
-        /// Gets the <see cref="MemoryItem"/> in this group with the specified key.
+        /// Gets the <see cref="MemoryItem"/> in this group with the specified <see cref="MemoryProperty"/>.
         /// </summary>
-        /// <param name="key">The unique identifier for the memory item.</param>
-        MemoryItem Get(string key);
+        /// <param name="property">The <see cref="MemoryProperty"/> describing the desired item in memory.</param>
+        MemoryItem Get(MemoryProperty property);
 
         /// <summary>
-        /// Sets the data store of this <see cref="MemoryItem"/> to a new <see cref="DataObject"/>.
+        /// Sets the data store of <see cref="MemoryItem"/> with the specified <see cref="MemoryProperty"/> to a given <see cref="DataObject"/> <paramref name="value"/>.
         /// </summary>
-        /// <param name="value">The value to set. The <paramref name="value"/> must have a <see cref="BassClefStudio.DbLanguage.Core.Data.DataObject.DataType"/> that inherits from or is the <see cref="MemoryItem.DataType"/>.</param>
-        /// <param name="key">The unique identifier for the memory item.</param>
+        /// <param name="value">The value to set. The <paramref name="value"/> must have a <see cref="DataObject.DataType"/> that inherits from or is the <see cref="MemoryProperty.Type"/>.</param>
+        /// <param name="property">The <see cref="MemoryProperty"/> describing the desired item in memory.</param>
         /// <returns>A <see cref="bool"/> representing whether the operation was a success.</returns>
-        bool Set(string key, DataObject value);
+        void Set(MemoryProperty property, DataObject value);
 
         /// <summary>
-        /// Checks to see if a memory item with the given key exists in the group.
+        /// Checks to see if a memory item attached to the given <see cref="MemoryProperty"/> exists in the group.
         /// </summary>
-        /// <param name="key">The unique identifier for the memory item.</param>
-        /// <returns><see cref="bool"/> value indicating the result of the check.</returns>
-        bool ContainsKey(string key);
+        /// <param name="property">The <see cref="MemoryProperty"/> describing the desired item in memory.</param>
+        /// <returns>A <see cref="bool"/> value indicating the result of the check.</returns>
+        bool ContainsKey(MemoryProperty property);
 
         /// <summary>
         /// Gets every identifier key in the memory group.
         /// </summary>
         /// <returns>An array of all keys.</returns>
-        string[] GetKeys();
+        MemoryProperty[] GetKeys();
     }
 
     /// <summary>
@@ -67,7 +67,7 @@ namespace BassClefStudio.DbLanguage.Core.Memory
         /// <summary>
         /// Adds a layer to the top of the stack.
         /// </summary>
-        /// <param name="memoryGroup">The memory group to add.</param>
+        /// <param name="newLayer">The memory group to add.</param>
         /// <returns>A <see cref="bool"/> indicating whether the operation succeeded.</returns>
         bool Push(IMemoryGroup newLayer);
 
@@ -89,6 +89,9 @@ namespace BassClefStudio.DbLanguage.Core.Memory
     {
     }
 
+    /// <summary>
+    /// Represents extension methods to the <see cref="IMemoryGroup"/> and related types.
+    /// </summary>
     public static class MemoryExtensions
     {
         /// <summary>
@@ -102,72 +105,30 @@ namespace BassClefStudio.DbLanguage.Core.Memory
 
             ////Checks that all keys are unique
             var diffChecker = new HashSet<string>();
-            bool allDifferent = allKeys.All(s => diffChecker.Add(s));
+            bool allDifferent = allKeys.All(s => diffChecker.Add(s.Key));
             return allDifferent;
         }
 
         /// <summary>
-        /// Checks to see if a <see cref="MemoryItem"/> exists in memory, using the public properties of <see cref="DataObject"/>s as <see cref="IMemoryGroup"/> objects themselves.
+        /// Checks to see if a memory item with the given key exists in the group.
         /// </summary>
-        /// <param name="group">The base memory group.</param>
-        /// <param name="path">The dot-delimited path to the desired <see cref="MemoryItem"/>.</param>
+        /// <param name="group">The given <see cref="IMemoryGroup"/>.</param>
+        /// <param name="key">The unique identifier for the memory item.</param>
         /// <returns><see cref="bool"/> value indicating the result of the check.</returns>
-        public static bool ContainsPath(this IMemoryGroup group, Namespace path)
+        public static bool ContainsKey(this IMemoryGroup group, string key)
         {
-            if (group.ContainsKey(path.NameParts[0]))
-            {
-                MemoryItem current = group.Get(path.NameParts[0]);
-                foreach (var part in path.NameParts.Skip(1))
-                {
-                    if (current.Value.ContainsKey(part))
-                    {
-                        current = current.Value.Get(part);
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return group.GetKeyNames().Contains(key);
         }
 
         /// <summary>
-        /// Gets a <see cref="MemoryItem"/> stored in memory, using the public properties of <see cref="DataObject"/>s as <see cref="IMemoryGroup"/> objects themselves.
+        /// Gets every identifier key name in the memory group.
         /// </summary>
-        /// <param name="group">The base memory group.</param>
-        /// <param name="path">The dot-delimited path to the desired <see cref="MemoryItem"/>.</param>
-        /// <returns>The <see cref="MemoryItem"/> property value.</returns>
-        public static MemoryItem GetPath(this IMemoryGroup group, Namespace path)
+        /// <param name="group">The given <see cref="IMemoryGroup"/>.</param>
+        /// <returns>An <see cref="IEnumerable{T}"/> of all <see cref="string"/> key names.</returns>
+        public static IEnumerable<string> GetKeyNames(this IMemoryGroup group)
         {
-            MemoryItem current = group.Get(path.NameParts[0]);
-            foreach (var part in path.NameParts.Skip(1))
-            {
-                current = current.Value.Get(part);
-            }
-            return current;
+            return group.GetKeys().Select(p => p.Key).ToArray();
         }
 
-        /// <summary>
-        /// Sets a <see cref="MemoryItem"/> stored in memory, using the public properties of <see cref="DataObject"/>s as <see cref="IMemoryGroup"/> objects themselves.
-        /// </summary>
-        /// <param name="group">The base memory group.</param>
-        /// <param name="path">The dot-delimited path to the desired <see cref="MemoryItem"/>.</param>
-        /// <param name="value">The value to set. The <paramref name="value"/> must have a <see cref="BassClefStudio.DbLanguage.Core.Data.DataObject.DataType"/> that inherits from or is the <see cref="MemoryItem.DataType"/>.</param>
-        /// <returns>A <see cref="bool"/> indicating whether the operation succeeded.</returns>
-        public static bool SetPath(this IMemoryGroup group, Namespace path, DataObject value)
-        {
-            MemoryItem current = group.Get(path.NameParts[0]);
-            foreach (var part in path.NameParts.Skip(1).Take(path.NameParts.Length - 2))
-            {
-                current = current.Value.Get(part);
-            }
-            return current.Value.Set(path.NameParts.Last(), value);
-        }
     }
 }

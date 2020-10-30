@@ -64,19 +64,19 @@ namespace BassClefStudio.DbLanguage.Core.Data
         }
 
         /// <inheritdoc/>
-        public MemoryItem Get(string key)
-            => PublicProperties.Get(key);
+        public MemoryItem Get(MemoryProperty property)
+            => PublicProperties.Get(property);
 
         /// <inheritdoc/>
-        public bool Set(string key, DataObject value)
-            => PublicProperties.Set(key, value);
+        public void Set(MemoryProperty property, DataObject value)
+            => PublicProperties.Set(property, value);
 
         /// <inheritdoc/>
-        public bool ContainsKey(string key)
-            => PublicProperties.ContainsKey(key);
+        public bool ContainsKey(MemoryProperty property)
+            => PublicProperties.ContainsKey(property);
 
         /// <inheritdoc/>
-        public string[] GetKeys()
+        public MemoryProperty[] GetKeys()
             => PublicProperties.GetKeys();
 
         #endregion

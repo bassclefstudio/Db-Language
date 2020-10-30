@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BassClefStudio.DbLanguage.Core.Scripts.Info
+namespace BassClefStudio.DbLanguage.Core.Runtime.Scripts
 {
     /// <summary>
     /// Represents the input to a <see cref="Script"/>, contained in the <see cref="ScriptInfo"/> metadata, which is strongly-typed and keyed for the creation for an input <see cref="Memory.IWritableMemoryGroup"/> for the running <see cref="Threading.Thread"/>.
@@ -20,6 +20,17 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Info
         /// A <see cref="string"/>, unique to the <see cref="Script"/>, which names the input value as it is passed to the <see cref="Memory.IWritableMemoryGroup"/>.
         /// </summary>
         public string Key { get; }
+
+        /// <summary>
+        /// Creates a <see cref="ScriptInput"/>.
+        /// </summary>
+        /// <param name="key">A <see cref="string"/>, unique to the <see cref="Script"/>, which names the input value.</param>
+        /// <param name="type">The required type that all values for this input must inherit from.</param>
+        public ScriptInput(string key, IType type)
+        {
+            Key = key;
+            Type = type;
+        }
 
         /// <summary>
         /// Checks if a <see cref="MemoryItem"/> for this <see cref="ScriptInput"/> can be created with the given input <see cref="DataObject"/>.
@@ -54,10 +65,16 @@ namespace BassClefStudio.DbLanguage.Core.Scripts.Info
         }
     }
 
+    /// <summary>
+    /// An <see cref="Exception"/> thrown when issues arise in the inputs for a <see cref="Script"/>.
+    /// </summary>
     public class ScriptInputException : Exception
     {
+        /// <inheritdoc/>
         public ScriptInputException() { }
+        /// <inheritdoc/>
         public ScriptInputException(string message) : base(message) { }
+        /// <inheritdoc/>
         public ScriptInputException(string message, Exception inner) : base(message, inner) { }
     }
 }

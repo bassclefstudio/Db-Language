@@ -43,40 +43,40 @@ namespace BassClefStudio.DbLanguage.Core.Memory
         }
 
         /// <inheritdoc/>
-        public string[] GetKeys()
+        public MemoryProperty[] GetKeys()
         {
-            return Items.Select(i => i.Property.Key).ToArray();
+            return Items.Select(i => i.Property).ToArray();
         }
 
         /// <inheritdoc/>
-        public bool ContainsKey(string key)
+        public bool ContainsKey(MemoryProperty property)
         {
-            return Items.Any(i => i.Property.Key == key);
+            return Items.Any(i => i.Property == property);
         }
 
         /// <inheritdoc/>
-        public MemoryItem Get(string key)
+        public MemoryItem Get(MemoryProperty property)
         {
-            return Items.First(i => i.Property.Key == key);
+            return Items.First(i => i.Property == property);
         }
 
         /// <inheritdoc/>
-        public bool Set(string key, DataObject value)
+        public void Set(MemoryProperty property, DataObject value)
         {
-            if (ContainsKey(key))
+            if (ContainsKey(property))
             {
-                return Items.First(i => i.Property.Key == key).Set(value);
+                Items.First(i => i.Property == property).Set(value);
             }
             else
             {
-                return false;
+                throw new MemoryException($"Attempted to set the value of property {property.Key} which does not exist in this MemoryGroup.");
             }
         }
 
         /// <inheritdoc/>
         public bool Add(MemoryItem item)
         {
-            if (ContainsKey(item.Property.Key))
+            if (Items.Any(i => i.Property.Key == item.Property.Key))
             {
                 return false;
             }

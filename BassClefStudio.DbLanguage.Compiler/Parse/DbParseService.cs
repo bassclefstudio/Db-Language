@@ -1,5 +1,4 @@
-﻿using BassClefStudio.DbLanguage.Core.Scripts.Commands;
-using Pidgin;
+﻿using Pidgin;
 using System;
 using System.Collections.Generic;
 using System.IO;

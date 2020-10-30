@@ -1,9 +1,9 @@
-﻿using BassClefStudio.DbLanguage.Core.Scripts.Commands;
+﻿using BassClefStudio.DbLanguage.Core.Runtime.Commands;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BassClefStudio.DbLanguage.Core.Scripts.Threading
+namespace BassClefStudio.DbLanguage.Core.Runtime.Threading
 {
     /// <summary>
     /// Represents the pointer for a <see cref="Thread"/> that controls the movement between <see cref="ICommand"/> objects.
