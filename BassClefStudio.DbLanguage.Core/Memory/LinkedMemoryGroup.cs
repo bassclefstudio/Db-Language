@@ -26,36 +26,43 @@ namespace BassClefStudio.DbLanguage.Core.Memory
         }
 
         /// <inheritdoc/>
-        public string[] GetKeys()
+        public MemoryProperty[] GetKeys()
         {
             return LinkedGroups.SelectMany(g => g.GetKeys()).ToArray();
         }
 
         /// <inheritdoc/>
-        public bool ContainsKey(string key)
+        public bool ContainsKey(MemoryProperty property)
         {
-            return LinkedGroups.SelectMany(g => g.GetKeys()).Contains(key);
+            return LinkedGroups.SelectMany(g => g.GetKeys()).Contains(property);
         }
 
         /// <summary>
         /// Internal - gets the group in <see cref="LinkedGroups"/> that contains the specified key.
         /// </summary>
-        /// <param name="key">The unique identifier for the memory item.</param>
-        private IMemoryGroup GetGroupFor(string key)
+        /// <param name="property">The <see cref="MemoryProperty"/> identifying the memory item.</param>
+        private IMemoryGroup GetGroupFor(MemoryProperty property)
         {
-            return LinkedGroups.First(g => g.ContainsKey(key));
+            return LinkedGroups.First(g => g.ContainsKey(property));
         }
 
         /// <inheritdoc/>
-        public MemoryItem Get(string key)
+        public MemoryItem Get(MemoryProperty property)
         {
-            return GetGroupFor(key).Get(key);
+            return GetGroupFor(property).Get(property);
         }
 
         /// <inheritdoc/>
-        public bool Set(string key, DataObject value)
+        public void Set(MemoryProperty property, DataObject value)
         {
-            return GetGroupFor(key).Set(key, value);
+            if (ContainsKey(property))
+            {
+                GetGroupFor(property).Set(property, value);
+            }
+            else
+            {
+                throw new MemoryException($"Attempted to set the value of property {property.Key} which does not exist in this LinkedMemoryGroup.");
+            }
         }
     }
 
@@ -92,7 +99,7 @@ namespace BassClefStudio.DbLanguage.Core.Memory
         /// <inheritdoc/>
         public bool Add(MemoryItem item)
         {
-            if (ContainsKey(item.Property.Key))
+            if (ContainsKey(item.Property))
             {
                 return false;
             }

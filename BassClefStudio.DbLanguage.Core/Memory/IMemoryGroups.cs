@@ -105,7 +105,7 @@ namespace BassClefStudio.DbLanguage.Core.Memory
 
             ////Checks that all keys are unique
             var diffChecker = new HashSet<string>();
-            bool allDifferent = allKeys.All(s => diffChecker.Add(s));
+            bool allDifferent = allKeys.All(s => diffChecker.Add(s.Key));
             return allDifferent;
         }
 

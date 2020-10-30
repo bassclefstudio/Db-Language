@@ -49,6 +49,7 @@ namespace BassClefStudio.DbLanguage.Core.Memory
             Flags = flags;
         }
 
+        //// These ==s are questionable in the strongly-typed paradigm.
         /// <inheritdoc/>
         public static bool operator ==(MemoryProperty a, MemoryProperty b)
         {

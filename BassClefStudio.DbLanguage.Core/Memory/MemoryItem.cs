@@ -34,16 +34,15 @@ namespace BassClefStudio.DbLanguage.Core.Memory
         /// </summary>
         /// <param name="value">The value to set. The <paramref name="value"/> must have a <see cref="BassClefStudio.DbLanguage.Core.Data.DataObject.DataType"/> that inherits from or is <see cref="DataType"/>.</param>
         /// <returns>A <see cref="bool"/> representing whether the operation was a success.</returns>
-        public bool Set(DataObject value)
+        public void Set(DataObject value)
         {
             if(value.DataType.Is(this.Property.Type))
             {
                 Value = value;
-                return true;
             }
             else
             {
-                return false;
+                throw new MemoryException($"The value being set is of type {value?.DataType.TypeName}, which is not of property type {Property.Type.TypeName}.");
             }
         }
     }

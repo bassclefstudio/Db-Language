@@ -53,7 +53,8 @@ namespace BassClefStudio.DbLanguage.Core.Runtime.Scripts
             //// TODO: Make sure that this is the correct way to get the output of a script; handle flags such as no return and exception.
             if (thread.Pointer.Flags.HasFlag(CommandPointerFlags.Returned))
             {
-                return inputs.Get("return").Value;
+                throw new NotImplementedException();
+                //return inputs.Get("return").Value;
             }
             else
             {
