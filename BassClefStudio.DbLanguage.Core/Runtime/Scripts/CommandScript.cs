@@ -48,13 +48,12 @@ namespace BassClefStudio.DbLanguage.Core.Runtime.Scripts
                 new ThreadPointer(Commands.ToArray()),
                 null);
 
-            await thread.RunThreadAsync(ParentObject, inputs);
+            var output = await thread.RunThreadAsync(ParentObject, inputs);
 
             //// TODO: Make sure that this is the correct way to get the output of a script; handle flags such as no return and exception.
             if (thread.Pointer.Flags.HasFlag(CommandPointerFlags.Returned))
             {
-                throw new NotImplementedException();
-                //return inputs.Get("return").Value;
+                return output;
             }
             else
             {

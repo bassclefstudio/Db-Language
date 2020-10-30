@@ -123,4 +123,22 @@ namespace BassClefStudio.DbLanguage.Core.Runtime.Commands
             }
         }
     }
+
+    /// <summary>
+    /// Runs a collection of <see cref="ICommand"/>s on . This is not a <see cref="Script"/> and does not have inputs or a strongly-typed output.
+    /// </summary>
+    public class GroupCommand : BaseCommand
+    {
+        /// <summary>
+        /// A collection of <see cref="ICommand"/>s to execute on a <see cref="Thread"/>.
+        /// </summary>
+        public IEnumerable<ICommand> Commands { get; }
+
+        /// <inheritdoc/>
+        public override async Task<DataObject> ExecuteCommandAsync(Thread thread, DataObject me, IMemoryGroup context)
+        {
+            Thread groupThread = new Thread(thread, new ThreadPointer(Commands.ToArray()));
+            return await groupThread.RunThreadAsync(me, new MemoryGroup());
+        }
+    }
 }
