@@ -15,7 +15,7 @@ namespace BassClefStudio.DbLanguage.Core.Runtime.Commands
     public interface ICommand : ICapable
     {
         /// <summary>
-        /// Executes the command asynchronously.
+        /// Executes the command asynchronously, returning a <see cref="DataObject"/> representing the output or new context.
         /// </summary>
         /// <param name="me">The current <see cref="DataObject"/> context at the point this <see cref="ICommand"/> is called.</param>
         /// <param name="thread">The owning <see cref="Thread"/> object, which manages the memory and <see cref="CapabilitiesCollection"/> for the <see cref="ICommand"/>.</param>
