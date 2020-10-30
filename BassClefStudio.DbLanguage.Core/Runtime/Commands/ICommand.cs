@@ -17,8 +17,9 @@ namespace BassClefStudio.DbLanguage.Core.Runtime.Commands
         /// <summary>
         /// Executes the command asynchronously, returning a <see cref="DataObject"/> representing the output or new context.
         /// </summary>
-        /// <param name="me">The current <see cref="DataObject"/> context at the point this <see cref="ICommand"/> is called.</param>
         /// <param name="thread">The owning <see cref="Thread"/> object, which manages the memory and <see cref="CapabilitiesCollection"/> for the <see cref="ICommand"/>.</param>
-        Task<DataObject> ExecuteCommandAsync(DataObject me, Thread thread);
+        /// <param name="me">The object that began calls to the <see cref="Thread"/>.</param>
+        /// <param name="myContext">The current <see cref="DataObject"/> context at the point this <see cref="ICommand"/> is called.</param>
+        Task<DataObject> ExecuteCommandAsync(Thread thread, DataObject me, DataObject myContext);
     }
 }

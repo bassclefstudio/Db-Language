@@ -83,9 +83,10 @@ namespace BassClefStudio.DbLanguage.Core.Runtime.Threading
             MemoryStack.Push(inputs);
             MemoryStack.Push();
 
+            DataObject commandContext = null;
             while (!Pointer.IsStopped)
             {
-                await Pointer.CurrentCommand.ExecuteCommandAsync(me, this);
+                commandContext = await Pointer.CurrentCommand.ExecuteCommandAsync(this, me, commandContext);
                 Pointer.Next();
             }
         }
