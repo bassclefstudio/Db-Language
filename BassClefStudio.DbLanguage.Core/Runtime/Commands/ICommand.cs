@@ -18,8 +18,41 @@ namespace BassClefStudio.DbLanguage.Core.Runtime.Commands
         /// Executes the command asynchronously, returning a <see cref="DataObject"/> representing the output or new context.
         /// </summary>
         /// <param name="thread">The owning <see cref="Thread"/> object, which manages the memory and <see cref="CapabilitiesCollection"/> for the <see cref="ICommand"/>.</param>
-        /// <param name="me">The object that began calls to the <see cref="Thread"/>.</param>
-        /// <param name="myContext">The current <see cref="DataObject"/> context at the point this <see cref="ICommand"/> is called.</param>
-        Task<DataObject> ExecuteCommandAsync(Thread thread, DataObject me, DataObject myContext);
+        /// <param name="me">The <see cref="DataObject"/> caller of the <see cref="ICommand"/>.</param>
+        /// <param name="context">The current <see cref="IMemoryGroup"/> memory context at the point this <see cref="ICommand"/> is called.</param>
+        Task<DataObject> ExecuteCommandAsync(Thread thread, DataObject me, IMemoryGroup context);
+    }
+
+    /// <summary>
+    /// Represents a basic <see cref="ICommand"/> that requires no <see cref="Capability"/>s to execute.
+    /// </summary>
+    public abstract class BaseCommand : ICommand
+    {
+        /// <inheritdoc/>
+        public abstract Task<DataObject> ExecuteCommandAsync(Thread thread, DataObject me, IMemoryGroup context);
+
+        /// <inheritdoc/>
+        public CapabilitiesCollection GetCapabilities()
+        {
+            return new CapabilitiesCollection();
+        }
+    }
+
+    /// <summary>
+    /// An <see cref="Exception"/> thrown on the unexpected termination or failure of an <see cref="ICommand"/>.
+    /// </summary>
+    [Serializable]
+    public class CommandException : Exception
+    {
+        /// <inheritdoc/>
+        public CommandException() { }
+        /// <inheritdoc/>
+        public CommandException(string message) : base(message) { }
+        /// <inheritdoc/>
+        public CommandException(string message, Exception inner) : base(message, inner) { }
+        /// <inheritdoc/>
+        protected CommandException(
+          System.Runtime.Serialization.SerializationInfo info,
+          System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
     }
 }

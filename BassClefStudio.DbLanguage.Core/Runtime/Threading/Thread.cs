@@ -74,7 +74,8 @@ namespace BassClefStudio.DbLanguage.Core.Runtime.Threading
         /// </summary>
         /// <param name="me">The owning <see cref="DataObject"/>, which executes the commands and provides bound .NET objects.</param>
         /// <param name="inputs">Memory context in the form of local variables such as inputs or scoped variables.</param>
-        public async Task RunThreadAsync(DataObject me, IMemoryGroup inputs)
+        /// <returns>A <see cref="DataObject"/> representing the context at the point the <see cref="Thread"/> completed execution (this value may be null).</returns>
+        public async Task<DataObject> RunThreadAsync(DataObject me, IMemoryGroup inputs)
         {
             ////Initializes memory.
             MemoryStack = new MemoryStack();
@@ -83,12 +84,13 @@ namespace BassClefStudio.DbLanguage.Core.Runtime.Threading
             MemoryStack.Push(inputs);
             MemoryStack.Push();
 
-            DataObject commandContext = null;
+            IMemoryGroup commandContext = null;
             while (!Pointer.IsStopped)
             {
                 commandContext = await Pointer.CurrentCommand.ExecuteCommandAsync(this, me, commandContext);
                 Pointer.Next();
             }
+            return commandContext as DataObject;
         }
     }
 }
