@@ -6,7 +6,7 @@ using System.Text;
 
 namespace BassClefStudio.DbLanguage.Compiler.Parse
 {
-    internal class StringLibrary
+    internal class StringPackage
     {
         public string Name { get; set; }
         public IEnumerable<string> Dependencies { get; set; }
@@ -56,7 +56,7 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
     {
         public string ReturnType { get; set; }
         public IEnumerable<StringInput> Inputs { get; set; }
-        public IEnumerable<ICodeStatement> Commands { get; set; }
+        //public IEnumerable<ICodeStatement> Commands { get; set; }
 
         public override string ToString()
         {

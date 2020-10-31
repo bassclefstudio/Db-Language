@@ -10,11 +10,11 @@ using static Pidgin.Parser<char>;
 namespace BassClefStudio.DbLanguage.Compiler.Parse
 {
     /// <summary>
-    /// A parser based on the <see cref="Pidgin.Parser"/> framework that converts <see cref="string"/> code in the Db language to a tokenized <see cref="StringLibrary"/>. Supports recursion and complex commands across the full Db language, along with exception support.
+    /// A parser based on the <see cref="Pidgin.Parser"/> framework that converts <see cref="string"/> code in the Db language to a tokenized <see cref="StringPackage"/>. Supports recursion and complex commands across the full Db language, along with exception support.
     /// </summary>
     internal class DbParseService : IParseService
     {
-        private Parser<char, StringLibrary> LibraryParser { get; }
+        private Parser<char, StringPackage> LibraryParser { get; }
 
         #region Basic
         #region Symbols
@@ -68,75 +68,11 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
         #region Language
         #region Scripts
 
-        private Parser<char, StringChild> Script;
-        private Parser<char, StringInput> Input;
-
         private void InitScripts()
         {
-            Input =
-                from t in Path.Before(Whitespace.AtLeastOnce())
-                from n in Name
-                select new StringInput() { Type = t, Name = n };
 
-            Script =
-                from v in OneOf(Try(Public.ThenReturn(true)), Try(Private.ThenReturn(false))).Before(Whitespace.AtLeastOnce()).Optional()
-                from t in Path.Before(Whitespace.AtLeastOnce())
-                from n in Name.Before(SkipWhitespaces)
-                from i in Input.Separated(Comma.Between(SkipWhitespaces)).Between(OpenParenthesis, CloseParenthesis)
-                from cs in Block(SkipWhitespaces.Then(Lines))
-                select new StringScript() { IsPublic = v.GetValueOrDefault(false), ReturnType = t, Name = n, Inputs = i, Commands = cs } as StringChild;
         }
 
-        #region Code
-
-        private Parser<char, ICodeValue> GetValue;
-        private Parser<char, ICodeBoth> Method;
-        private Parser<char, ICodeStatement> VarStatement;
-        private Parser<char, ICodeStatement> AddStatement;
-        private Parser<char, ICodeStatement> SetStatement;
-        private Parser<char, ICodeStatement> ReturnStatement;
-
-        private Parser<char, ICodeValue> ValueStack;
-        private Parser<char, IEnumerable<ICodeValue>> AnyValue;
-        private Parser<char, ICodeBoth> Stack;
-        private Parser<char, ICodeStatement> AnyStatement;
-        private Parser<char, IEnumerable<ICodeStatement>> Lines;
-
-        private void InitCode()
-        {
-            GetValue = Name.Select<ICodeValue>(n => new CodeGet() { Name = n });
-            Method = Rec(() => ValueStack).Separated(Comma.Then(SkipWhitespaces)).Between(OpenParenthesis, CloseParenthesis).Select<ICodeBoth>(i => new CodeCall() { Inputs = i });
-            VarStatement =
-                from v in Var.Before(Whitespace.AtLeastOnce())
-                from n in Name
-                select new CodeVar() { Name = n } as ICodeStatement;
-            AddStatement =
-                from t in Path.Before(Whitespace.AtLeastOnce())
-                from n in Name
-                select new CodeAdd() { Type = t, Name = n } as ICodeStatement;
-            SetStatement =
-                from p in Path
-                from eq in Equal.Between(SkipWhitespaces)
-                from v in Rec(() => ValueStack)
-                select new CodeSet() { Path = p, Value = v } as ICodeStatement;
-            ReturnStatement =
-                from r in Return.Before(Whitespace.AtLeastOnce())
-                from v in Rec(() => ValueStack)
-                select new CodeReturn() { Value = v } as ICodeStatement;
-            AnyValue = Try(Map((a, b) => new ICodeValue[] { a, b } as IEnumerable<ICodeValue>, GetValue, Method)).Or(GetValue.Select<IEnumerable<ICodeValue>>(g => new ICodeValue[] { g }));
-            ValueStack = AnyValue.Separated(Dot).Select<ICodeValue>(v => new CodeValueStack() { Values = v.SelectMany(vs => vs) });
-            Stack = ValueStack.Bind(v =>
-            {
-                var stack = v as CodeValueStack;
-                return stack.Values.LastOrDefault() is ICodeBoth ?
-                    Return<ICodeBoth>(new CodeStack() { Values = stack.Values }) :
-                    Fail<ICodeBoth>("Stack ended in value, not method call - a line cannot end with a GET request, only a method call.");
-            });
-            AnyStatement = OneOf(Try(VarStatement), Try(AddStatement), Try(SetStatement), Try(ReturnStatement), Stack.As<char, ICodeStatement, ICodeBoth>());
-            Lines = AnyStatement.SeparatedAndTerminated(SemiColon.Then(SkipWhitespaces));
-        }
-
-        #endregion
         #endregion
         #region Properties
         private Parser<char, StringChild> Property;
@@ -166,7 +102,8 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
                 from d in Try(Colon.Between(SkipWhitespaces).Then(Path.SeparatedAtLeastOnce(Comma.Then(SkipWhitespaces)))).Optional()
                 select new StringTypeHeader() { Name = n, IsConcrete = t, Dependencies = d.GetValueOrDefault(new string[0]) };
             
-            Body = OneOf(Try(Property), Script).Before(SkipWhitespaces).Many();
+            //// Add OneOf(Try(Property), Script) when scripts are ready.
+            Body = OneOf(Try(Property)).Before(SkipWhitespaces).Many();
 
             Class =
                 from h in Header
@@ -183,16 +120,15 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
         public DbParseService()
         {
             InitStructures();
-            InitCode();
             InitScripts();
             InitProperties();
             InitLanguage();
         }
 
         /// <inheritdoc/>
-        public StringLibrary ParseLibrary(string code) => ParseLibrary(new StringReader(code));
+        public StringPackage ParseLibrary(string code) => ParseLibrary(new StringReader(code));
         /// <inheritdoc/>
-        public StringLibrary ParseLibrary(TextReader textReader)
+        public StringPackage ParseLibrary(TextReader textReader)
         {
             var result = LibraryParser.Parse(textReader);
             if (result.Success)
@@ -217,28 +153,6 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
         public StringType ParseClass(TextReader textReader)
         {
             var result = Class.Parse(textReader);
-            if (result.Success)
-            {
-                return result.Value;
-            }
-            else
-            {
-                throw new ParseException(result.Error.RenderErrorMessage());
-            }
-        }
-
-        /// <summary>
-        /// Parses a block of Db code into a collection of <see cref="ICodeStatement"/>s.
-        /// </summary>
-        /// <param name="code">The <see cref="string"/> code.</param>
-        public IEnumerable<ICodeStatement> ParseCode(string code) => ParseCode(new StringReader(code));
-        /// <summary>
-        /// Parses a block of Db code into a collection of <see cref="ICodeStatement"/>s.
-        /// </summary>
-        /// <param name="textReader">A <see cref="TextReader"/> that can read a block of code.</param>
-        public IEnumerable<ICodeStatement> ParseCode(TextReader textReader)
-        {
-            var result = Lines.Parse(textReader);
             if (result.Success)
             {
                 return result.Value;
