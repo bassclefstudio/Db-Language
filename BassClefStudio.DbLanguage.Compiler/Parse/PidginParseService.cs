@@ -10,9 +10,9 @@ using static Pidgin.Parser<char>;
 namespace BassClefStudio.DbLanguage.Compiler.Parse
 {
     /// <summary>
-    /// A parser based on the <see cref="Pidgin.Parser"/> framework that converts <see cref="string"/> code in the Db language to a tokenized <see cref="StringPackage"/>. Supports recursion and complex commands across the full Db language, along with exception support.
+    /// A parser based on the <see cref="Pidgin.Parser"/> framework that converts <see cref="string"/> code in the Db language to a tokenized output. Supports recursion and complex commands across the full Db language, along with exception support.
     /// </summary>
-    internal class DbParseService
+    internal class PidginParseService
     {
         //private Parser<char, StringPackage> LibraryParser { get; }
 
