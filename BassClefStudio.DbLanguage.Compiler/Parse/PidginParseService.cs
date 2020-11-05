@@ -12,7 +12,7 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
     /// <summary>
     /// A parser based on the <see cref="Pidgin.Parser"/> framework that converts <see cref="string"/> code in the Db language to a tokenized output. Supports recursion and complex commands across the full Db language, along with exception support.
     /// </summary>
-    internal class PidginParseService
+    internal class PidginParseService : ITypeParseService
     {
         private Parser<char, TokenType> TypeParser { get; set; }
 
@@ -125,19 +125,34 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
             InitProperties();
             InitLanguage();
         }
-    }
 
-    /// <summary>
-    /// Represents an <see cref="Exception"/> thrown during <see cref="string"/>-to-token parsing.
-    /// </summary>
-    public class ParseException : Exception
-    {
         /// <inheritdoc/>
-        internal ParseException() { }
+        public TokenType ParseType(string type)
+        {
+            var result = TypeParser.Parse(type);
+            if (result.Success)
+            {
+                return result.Value;
+            }
+            else
+            {
+                throw new ParseException(result.Error.ToString());
+            }
+        }
+
         /// <inheritdoc/>
-        internal ParseException(string message) : base(message) { }
-        /// <inheritdoc/>
-        internal ParseException(string message, Exception inner) : base(message, inner) { }
+        public TokenType ParseType(TextReader typeReader)
+        {
+            var result = TypeParser.Parse(typeReader);
+            if (result.Success)
+            {
+                return result.Value;
+            }
+            else
+            {
+                throw new ParseException(result.Error.ToString());
+            }
+        }
     }
 
     /// <summary>
