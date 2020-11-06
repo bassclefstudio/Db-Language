@@ -5,6 +5,8 @@ using System.Text;
 
 namespace BassClefStudio.DbLanguage.Compiler.Parse
 {
+    #region Types
+
     /// <summary>
     /// Represents the location in a document that a particular token was retrieved from.
     /// </summary>
@@ -106,6 +108,9 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
         public string ValueType { get; set; }
     }
 
+    #endregion
+    #region Scripts
+
     /// <summary>
     /// Represents a tokenized method definition for a <see cref="TokenType"/>.
     /// </summary>
@@ -115,5 +120,28 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
         /// The <see cref="string"/> name of the type this <see cref="TokenScript"/> returns.
         /// </summary>
         public string ReturnType { get; set; }
+
+        /// <summary>
+        /// A collection of <see cref="TokenScript"/> inputs to the <see cref="TokenScript"/>.
+        /// </summary>
+        public IEnumerable<TokenScriptInput> Inputs { get; set; }
     }
+
+    /// <summary>
+    /// Represents a named, strongly-typed input to a <see cref="TokenScript"/>.
+    /// </summary>
+    public class TokenScriptInput
+    {
+        /// <summary>
+        /// The name of the <see cref="TokenScriptInput"/>.
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// The <see cref="string"/> name of the data type of this <see cref="TokenScriptInput"/>.
+        /// </summary>
+        public string Type { get; set; }
+    }
+
+    #endregion
 }
