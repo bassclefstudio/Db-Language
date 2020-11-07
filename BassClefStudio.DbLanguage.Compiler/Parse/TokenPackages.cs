@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BassClefStudio.DbLanguage.Core.Runtime.Commands;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
@@ -55,20 +56,26 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
         public string Name { get; set; }
 
         /// <summary>
-        /// A <see cref="bool"/> indicating whether the <see cref="TokenChild"/> should be publicly accessible.
-        /// </summary>
-        public bool IsPublic { get; set; }
-
-        /// <summary>
         /// An optional <see cref="TokenPos"/> representing the location in the source code where the text representing this <see cref="TokenChild"/> occurs.
         /// </summary>
         public TokenPos SourcePosition { get; set; }
     }
+    
+    /// <summary>
+    /// Represents a <see cref="TokenChild"/> with an accessibility modifier.
+    /// </summary>
+    public abstract class TokenAccessible : TokenChild
+    {
+        /// <summary>
+        /// A <see cref="bool"/> indicating whether the <see cref="TokenChild"/> should be publicly accessible.
+        /// </summary>
+        public bool IsPublic { get; set; }
+    }
 
     /// <summary>
-    /// Represents a <see cref="TokenChild"/> header for a type.
+    /// Represents a <see cref="TokenAccessible"/> header for a type.
     /// </summary>
-    public class TokenTypeHeader : TokenChild
+    public class TokenTypeHeader : TokenAccessible
     {
         /// <summary>
         /// A <see cref="bool"/> indicating whether the <see cref="TokenType"/> this header is attached to should be treated as a type (class) or contract (interface).
@@ -100,7 +107,7 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
     /// <summary>
     /// Represents a tokenized property definition for a <see cref="TokenType"/>.
     /// </summary>
-    public class TokenProperty : TokenChild
+    public class TokenProperty : TokenAccessible
     {
         /// <summary>
         /// The <see cref="string"/> name of the type of the value stored in this property.
@@ -114,7 +121,7 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
     /// <summary>
     /// Represents a tokenized method definition for a <see cref="TokenType"/>.
     /// </summary>
-    public class TokenScript : TokenChild
+    public class TokenScript : TokenAccessible
     {
         /// <summary>
         /// The <see cref="string"/> name of the type this <see cref="TokenScript"/> returns.
@@ -130,18 +137,19 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
     /// <summary>
     /// Represents a named, strongly-typed input to a <see cref="TokenScript"/>.
     /// </summary>
-    public class TokenScriptInput
+    public class TokenScriptInput : TokenChild
     {
-        /// <summary>
-        /// The name of the <see cref="TokenScriptInput"/>.
-        /// </summary>
-        public string Name { get; set; }
-
         /// <summary>
         /// The <see cref="string"/> name of the data type of this <see cref="TokenScriptInput"/>.
         /// </summary>
         public string Type { get; set; }
     }
+
+    /// <summary>
+    /// Represents a tokenized command inside of a <see cref="TokenScript"/>, which can map (not necessarily one-to-one) to compiled <see cref="ICommand"/>s.
+    /// </summary>
+    public abstract class TokenCommand
+    { }
 
     #endregion
 }

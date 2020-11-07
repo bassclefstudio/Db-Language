@@ -1,4 +1,5 @@
-﻿using Pidgin;
+﻿using BassClefStudio.DbLanguage.Core.Runtime.Scripts;
+using Pidgin;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -68,18 +69,35 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
         #region Language
         #region Scripts
 
+        private Parser<char, TokenChild> Script;
+        private Parser<char, TokenScriptInput> ScriptInput;
+
         private void InitScripts()
         {
+            ScriptInput =
+                from p in CurrentPos
+                from t in Path.Before(Whitespace.AtLeastOnce())
+                from n in Name
+                select new TokenScriptInput() { SourcePosition = new TokenPos(p), Type = t, Name = n };
 
+            //// TODO: Add commands to parser.
+            Script =
+                from p in CurrentPos
+                from v in OneOf(Try(Public.ThenReturn(true)), Try(Private.ThenReturn(false))).Before(Whitespace.AtLeastOnce()).Optional()
+                from t in Path.Before(Whitespace.AtLeastOnce())
+                from n in Name
+                from i in ScriptInput.Separated(Comma.Between(SkipWhitespaces)).Between(OpenParenthesis, CloseParenthesis)
+                select new TokenScript() { SourcePosition = new TokenPos(p), IsPublic = v.GetValueOrDefault(false), ReturnType = t, Name = n, Inputs = i } as TokenChild;
         }
 
         #endregion
         #region Properties
+
         private Parser<char, TokenChild> Property;
 
         private void InitProperties()
         {
-            // TODO: Initial value?
+            //// TODO: Initial value?
             Property =
                 from p in CurrentPos
                 from v in OneOf(Try(Public.ThenReturn(true)), Try(Private.ThenReturn(false))).Before(Whitespace.AtLeastOnce()).Optional()
@@ -103,8 +121,7 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
                 from d in Try(Colon.Between(SkipWhitespaces).Then(Path.SeparatedAtLeastOnce(Comma.Then(SkipWhitespaces)))).Optional()
                 select new TokenTypeHeader() { SourcePosition = new TokenPos(p), Name = n, IsConcrete = t, InheritsFrom = d.GetValueOrDefault(new string[0]) };
 
-            //// Add OneOf(Try(Property), Script) when scripts are ready.
-            Body = OneOf(Try(Property)).Before(SkipWhitespaces).Many();
+            Body = OneOf(Try(Property), Script).Before(SkipWhitespaces).Many();
 
             TypeParser =
                 from h in Header
