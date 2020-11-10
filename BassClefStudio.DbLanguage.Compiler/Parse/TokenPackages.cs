@@ -1,5 +1,7 @@
 ﻿using BassClefStudio.DbLanguage.Core.Lifecycle;
 using BassClefStudio.DbLanguage.Core.Runtime.Commands;
+using JsonSubTypes;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -66,12 +68,21 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
         /// </summary>
         public TokenPos SourcePosition { get; set; }
     }
-    
+
     /// <summary>
     /// Represents a <see cref="TokenChild"/> with an accessibility modifier.
     /// </summary>
+    [JsonConverter(typeof(JsonSubtypes), nameof(TokenAccessible.TokenType))]
+    [JsonSubtypes.KnownSubType(typeof(TokenProperty), "Property")]
+    [JsonSubtypes.KnownSubType(typeof(TokenScript), "Script")]
+    [JsonSubtypes.KnownSubType(typeof(TokenTypeHeader), "Type")]
     public abstract class TokenAccessible : TokenChild
     {
+        /// <summary>
+        /// An abstract value indicating the type of token.
+        /// </summary>
+        public abstract string TokenType { get; }
+
         /// <summary>
         /// A <see cref="bool"/> indicating whether the <see cref="TokenChild"/> should be publicly accessible.
         /// </summary>
@@ -80,7 +91,7 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
 
     #endregion
     #region Packages
-    
+
     /// <summary>
     /// Represens a tokenized <see cref="IPackage"/>.
     /// </summary>
@@ -116,6 +127,9 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
     /// </summary>
     public class TokenTypeHeader : TokenAccessible
     {
+        /// <inheritdoc/>
+        public override string TokenType { get; } = "Type";
+
         /// <summary>
         /// A <see cref="bool"/> indicating whether the <see cref="TokenType"/> this header is attached to should be treated as a type (class) or contract (interface).
         /// </summary>
@@ -140,7 +154,7 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
         /// <summary>
         /// The body of the <see cref="TokenType"/>, containing a number of <see cref="TokenChild"/>s (traditionally properties or methods).
         /// </summary>
-        public IEnumerable<TokenChild> Children { get; set; }
+        public IEnumerable<TokenAccessible> Children { get; set; }
     }
 
     /// <summary>
@@ -148,6 +162,9 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
     /// </summary>
     public class TokenProperty : TokenAccessible
     {
+        /// <inheritdoc/>
+        public override string TokenType { get; } = "Property";
+
         /// <summary>
         /// The <see cref="string"/> name of the type of the value stored in this property.
         /// </summary>
@@ -162,6 +179,9 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
     /// </summary>
     public class TokenScript : TokenAccessible
     {
+        /// <inheritdoc/>
+        public override string TokenType { get; } = "Script";
+
         /// <summary>
         /// The <see cref="string"/> name of the type this <see cref="TokenScript"/> returns.
         /// </summary>
@@ -192,8 +212,20 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
     /// <summary>
     /// Represents a tokenized command inside of a <see cref="TokenScript"/>, which can map (not necessarily one-to-one) to compiled <see cref="ICommand"/>s.
     /// </summary>
+    [JsonConverter(typeof(JsonSubtypes), nameof(TokenCommand.CommandType))]
+    [JsonSubtypes.KnownSubType(typeof(ThisTokenCommand), "THIS")]
+    [JsonSubtypes.KnownSubType(typeof(PathTokenCommand), "GET")]
+    [JsonSubtypes.KnownSubType(typeof(EqualTokenCommand), "SET")]
+    [JsonSubtypes.KnownSubType(typeof(EndLineTokenCommand), "END")]
+    [JsonSubtypes.KnownSubType(typeof(ExecuteTokenCommand), "EXECUTE")]
+    [JsonSubtypes.KnownSubType(typeof(LiteralTokenCommand), "SVAL")]
     public abstract class TokenCommand
     {
+        /// <summary>
+        /// A <see cref="string"/> value indicating the type of command.
+        /// </summary>
+        public abstract string CommandType { get; }
+
         /// <summary>
         /// An optional <see cref="TokenPos"/> representing the location in the source code where the text representing this <see cref="TokenChild"/> occurs.
         /// </summary>
@@ -204,19 +236,37 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
     /// Represents a tokenized THIS command.
     /// </summary>
     public class ThisTokenCommand : TokenCommand
-    { }
+    {
+        /// <inheritdoc/>
+        public override string CommandType { get; } = "THIS";
+    }
 
     /// <summary>
     /// Represents an equals (=) command token (usually for the SET command).
     /// </summary>
     public class EqualTokenCommand : TokenCommand
-    { }
+    {
+        /// <inheritdoc/>
+        public override string CommandType { get; } = "SET";
+    }
+
+    /// <summary>
+    /// Represents an end-of-line (;) command token.
+    /// </summary>
+    public class EndLineTokenCommand : TokenCommand
+    {
+        /// <inheritdoc/>
+        public override string CommandType { get; } = "END";
+    }
 
     /// <summary>
     /// Represents a tokenized reference to a path or property.
     /// </summary>
     public class PathTokenCommand : TokenCommand
     {
+        /// <inheritdoc/>
+        public override string CommandType { get; } = "GET";
+
         /// <summary>
         /// Represents the path of the item to retreive, set, or reference.
         /// </summary>
@@ -228,10 +278,27 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
     /// </summary>
     public class ExecuteTokenCommand : TokenCommand
     {
+        /// <inheritdoc/>
+        public override string CommandType { get; } = "EXECUTE";
+
         /// <summary>
         /// The given inputs, as <see cref="TokenCommand"/>s which, when compiled, can be run to resolve input objects.
         /// </summary>
         public IEnumerable<TokenCommand> Inputs { get; set; }
+    }
+
+    /// <summary>
+    /// Represents a <see cref="string"/> literal.
+    /// </summary>
+    public class LiteralTokenCommand : TokenCommand
+    {
+        /// <inheritdoc/>
+        public override string CommandType { get; } = "SVAL";
+
+        /// <summary>
+        /// The value of the literal, not including the quotes around it.
+        /// </summary>
+        public string Value { get; set; }
     }
 
     #endregion

@@ -2,6 +2,7 @@
 using BassClefStudio.DbLanguage.Core.Lifecycle;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,16 +22,16 @@ namespace BassClefStudio.DbLanguage.Compiler
     }
 
     /// <summary>
-    /// Represents a service that can convert from parsed <see cref="TokenPackage"/>s to serialized <typeparamref name="T"/> output that can be stored or sent.
+    /// Represents a service that can convert from parsed <see cref="TokenPackage"/>s to serialized file stream that can be stored or sent.
     /// </summary>
-    /// <typeparam name="T">The type of output this <see cref="IPublishPipeline{T}"/> supports.</typeparam>
-    public interface IPublishPipeline<T>
+    public interface IPublishPipeline
     {
         /// <summary>
-        /// Creates a serialized <typeparamref name="T"/> object containing the information needed to build the input <see cref="IPackage"/>.
+        /// Creates a serialized file containing the information needed to build the input <see cref="IPackage"/> and writes it to the given stream.
         /// </summary>
         /// <param name="package">The <see cref="TokenPackage"/> to serialize.</param>
-        Task<T> PublishPackageAsync(TokenPackage package);
+        /// <param name="stream">The <see cref="Stream"/> to write the output to.</param>
+        Task PublishPackageAsync(TokenPackage package, Stream stream);
     }
 
     /// <summary>

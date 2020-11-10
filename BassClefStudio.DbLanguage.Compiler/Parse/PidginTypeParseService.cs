@@ -71,7 +71,7 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
         #region Language
         #region Scripts
 
-        private Parser<char, TokenChild> Script;
+        private Parser<char, TokenAccessible> Script;
         private Parser<char, TokenScriptInput> ScriptInput;
         private Parser<char, TokenCommand> Command;
 
@@ -80,9 +80,11 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
             //// TODO: Add all commands to parser.
             Command = OneOf(
                 CurrentPos.Before(This).Select<TokenCommand>(p => new ThisTokenCommand() { SourcePosition = new TokenPos(p) }),
-                Map((p, n) => new PathTokenCommand() { Path = n, SourcePosition = new TokenPos(p) } as TokenCommand, CurrentPos, Name),
+                Map((p, n) => new PathTokenCommand() { Path = n, SourcePosition = new TokenPos(p) } as TokenCommand, CurrentPos, Dot.Optional().Then(Name)),
                 Map((p, c) => new ExecuteTokenCommand() { SourcePosition = new TokenPos(p), Inputs = c } as TokenCommand, CurrentPos, Rec(() => Command).Separated(Comma).Between(OpenParenthesis, CloseParenthesis)),
-                CurrentPos.Before(Equal).Between(SkipWhitespaces).Select<TokenCommand>(p => new EqualTokenCommand() { SourcePosition = new TokenPos(p) }));
+                CurrentPos.Before(Equal).Select<TokenCommand>(p => new EqualTokenCommand() { SourcePosition = new TokenPos(p) }),
+                CurrentPos.Before(SemiColon).Select<TokenCommand>(p => new EndLineTokenCommand() { SourcePosition = new TokenPos(p) }),
+                Map((p, v) => new LiteralTokenCommand() { SourcePosition = new TokenPos(p), Value = v } as TokenCommand, CurrentPos, String));
 
             ScriptInput =
                 from p in CurrentPos
@@ -96,14 +98,14 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
                 from t in Path.Before(Whitespace.AtLeastOnce())
                 from n in Name
                 from i in ScriptInput.Separated(Comma.Between(SkipWhitespaces)).Between(OpenParenthesis, CloseParenthesis)
-                from c in Command.Many().Between(OpenBrace, CloseBrace)
-                select new TokenScript() { SourcePosition = new TokenPos(p), IsPublic = v.GetValueOrDefault(false), ReturnType = t, Name = n, Inputs = i, Commands = c } as TokenChild;
+                from c in Block(Command.SeparatedAndTerminated(SkipWhitespaces))
+                select new TokenScript() { SourcePosition = new TokenPos(p), IsPublic = v.GetValueOrDefault(false), ReturnType = t, Name = n, Inputs = i, Commands = c } as TokenAccessible;
         }
 
         #endregion
         #region Properties
 
-        private Parser<char, TokenChild> Property;
+        private Parser<char, TokenAccessible> Property;
 
         private void InitProperties()
         {
@@ -113,23 +115,24 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
                 from v in OneOf(Try(Public.ThenReturn(true)), Try(Private.ThenReturn(false))).Before(Whitespace.AtLeastOnce()).Optional()
                 from t in Path.Before(Whitespace.AtLeastOnce())
                 from n in Name.Before(SemiColon)
-                select new TokenProperty() { SourcePosition = new TokenPos(p), IsPublic = v.GetValueOrDefault(false), ValueType = t, Name = n } as TokenChild;
+                select new TokenProperty() { SourcePosition = new TokenPos(p), IsPublic = v.GetValueOrDefault(false), ValueType = t, Name = n } as TokenAccessible;
         }
 
         #endregion
         #region Core
 
         private Parser<char, TokenTypeHeader> Header;
-        private Parser<char, IEnumerable<TokenChild>> Body;
+        private Parser<char, IEnumerable<TokenAccessible>> Body;
 
         private void InitLanguage()
         {
             Header =
                 from p in CurrentPos
+                from v in OneOf(Try(Public.ThenReturn(true)), Try(Private.ThenReturn(false))).Before(Whitespace.AtLeastOnce()).Optional()
                 from t in OneOf(Try(Type.ThenReturn(true)), Contract.ThenReturn(false)).Before(Whitespace.AtLeastOnce())
                 from n in Name
                 from d in Try(Colon.Between(SkipWhitespaces).Then(Path.SeparatedAtLeastOnce(Comma.Then(SkipWhitespaces)))).Optional()
-                select new TokenTypeHeader() { SourcePosition = new TokenPos(p), Name = n, IsConcrete = t, InheritsFrom = d.GetValueOrDefault(new string[0]) };
+                select new TokenTypeHeader() { SourcePosition = new TokenPos(p), Name = n, IsPublic = v.GetValueOrDefault(false), IsConcrete = t, InheritsFrom = d.GetValueOrDefault(new string[0]) };
 
             Body = OneOf(Try(Property), Script).Before(SkipWhitespaces).Many();
 
