@@ -47,6 +47,21 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
     /// </summary>
     public class ParseException : Exception
     {
+        /// <summary>
+        /// The position in code the <see cref="ParseException"/> occurred at.
+        /// </summary>
+        public TokenPos Position { get; set; }
+
+        /// <summary>
+        /// Creates a new <see cref="ParseException"/>.
+        /// </summary>
+        /// <param name="pos">The position in code the <see cref="ParseException"/> occurred at.</param>
+        /// <param name="message">The message that describes the error.</param>
+        public ParseException(TokenPos pos, string message) : base($"{message} ({pos})")
+        {
+            Position = pos;
+        }
+
         /// <inheritdoc/>
         internal ParseException() { }
         /// <inheritdoc/>

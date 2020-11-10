@@ -1,4 +1,5 @@
-﻿using BassClefStudio.DbLanguage.Core.Runtime.Scripts;
+﻿using BassClefStudio.DbLanguage.Core.Runtime.Commands;
+using BassClefStudio.DbLanguage.Core.Runtime.Scripts;
 using Pidgin;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
     /// <summary>
     /// A parser based on the <see cref="Pidgin.Parser"/> framework that converts <see cref="string"/> code in the Db language to a tokenized output. Supports recursion and complex commands across the full Db language, along with exception support.
     /// </summary>
-    internal class PidginParseService : ITypeParseService
+    internal class PidginTypeParseService : ITypeParseService
     {
         private Parser<char, TokenType> TypeParser { get; set; }
 
@@ -40,6 +41,7 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
         private readonly Parser<char, string> Contract = String("contract");
         private readonly Parser<char, string> Var = String("var");
         private readonly Parser<char, string> Return = String("return");
+        private readonly Parser<char, string> This = String("this");
         #endregion
         #region Structures
         private Parser<char, string> String;
@@ -71,23 +73,31 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
 
         private Parser<char, TokenChild> Script;
         private Parser<char, TokenScriptInput> ScriptInput;
+        private Parser<char, TokenCommand> Command;
 
         private void InitScripts()
         {
+            //// TODO: Add all commands to parser.
+            Command = OneOf(
+                CurrentPos.Before(This).Select<TokenCommand>(p => new ThisTokenCommand() { SourcePosition = new TokenPos(p) }),
+                Map((p, n) => new PathTokenCommand() { Path = n, SourcePosition = new TokenPos(p) } as TokenCommand, CurrentPos, Name),
+                Map((p, c) => new ExecuteTokenCommand() { SourcePosition = new TokenPos(p), Inputs = c } as TokenCommand, CurrentPos, Rec(() => Command).Separated(Comma).Between(OpenParenthesis, CloseParenthesis)),
+                CurrentPos.Before(Equal).Between(SkipWhitespaces).Select<TokenCommand>(p => new EqualTokenCommand() { SourcePosition = new TokenPos(p) }));
+
             ScriptInput =
                 from p in CurrentPos
                 from t in Path.Before(Whitespace.AtLeastOnce())
                 from n in Name
                 select new TokenScriptInput() { SourcePosition = new TokenPos(p), Type = t, Name = n };
 
-            //// TODO: Add commands to parser.
             Script =
                 from p in CurrentPos
                 from v in OneOf(Try(Public.ThenReturn(true)), Try(Private.ThenReturn(false))).Before(Whitespace.AtLeastOnce()).Optional()
                 from t in Path.Before(Whitespace.AtLeastOnce())
                 from n in Name
                 from i in ScriptInput.Separated(Comma.Between(SkipWhitespaces)).Between(OpenParenthesis, CloseParenthesis)
-                select new TokenScript() { SourcePosition = new TokenPos(p), IsPublic = v.GetValueOrDefault(false), ReturnType = t, Name = n, Inputs = i } as TokenChild;
+                from c in Command.Many().Between(OpenBrace, CloseBrace)
+                select new TokenScript() { SourcePosition = new TokenPos(p), IsPublic = v.GetValueOrDefault(false), ReturnType = t, Name = n, Inputs = i, Commands = c } as TokenChild;
         }
 
         #endregion
@@ -133,9 +143,9 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
         #endregion
 
         /// <summary>
-        /// Creates a new <see cref="PidginParseService"/>, initializing the language parsing frameworks.
+        /// Creates a new <see cref="PidginTypeParseService"/>, initializing the language parsing frameworks.
         /// </summary>
-        public PidginParseService()
+        public PidginTypeParseService()
         {
             InitStructures();
             InitScripts();

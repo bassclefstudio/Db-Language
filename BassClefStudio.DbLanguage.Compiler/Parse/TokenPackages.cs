@@ -1,4 +1,5 @@
-﻿using BassClefStudio.DbLanguage.Core.Runtime.Commands;
+﻿using BassClefStudio.DbLanguage.Core.Lifecycle;
+using BassClefStudio.DbLanguage.Core.Runtime.Commands;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -6,7 +7,7 @@ using System.Text;
 
 namespace BassClefStudio.DbLanguage.Compiler.Parse
 {
-    #region Types
+    #region Headers
 
     /// <summary>
     /// Represents the location in a document that a particular token was retrieved from.
@@ -22,6 +23,11 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
         /// The column, or character in the line, of the location in the document.
         /// </summary>
         public int ColumnNumber { get; }
+
+        /// <summary>
+        /// Creates a new <see cref="TokenPos"/>.
+        /// </summary>
+        public TokenPos() { }
 
         /// <summary>
         /// Creates a new <see cref="TokenPos"/>.
@@ -71,6 +77,39 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
         /// </summary>
         public bool IsPublic { get; set; }
     }
+
+    #endregion
+    #region Packages
+    
+    /// <summary>
+    /// Represens a tokenized <see cref="IPackage"/>.
+    /// </summary>
+    public class TokenPackage
+    {
+        /// <summary>
+        /// Information about the <see cref="IPackage"/> this <see cref="TokenPackage"/> encodes.
+        /// </summary>
+        public PackageInfo PackageInfo { get; set; }
+
+        /// <summary>
+        /// The <see cref="TokenType"/>s for each defined type in the package.
+        /// </summary>
+        public IEnumerable<TokenType> Types { get; set; }
+
+        /// <summary>
+        /// Creates a new <see cref="TokenPackage"/>.
+        /// </summary>
+        /// <param name="info">Information about the <see cref="IPackage"/> this <see cref="TokenPackage"/> encodes.</param>
+        /// <param name="types">The <see cref="TokenType"/>s for each defined type in the package.</param>
+        public TokenPackage(PackageInfo info, IEnumerable<TokenType> types)
+        {
+            PackageInfo = info;
+            Types = types;
+        }
+    }
+
+    #endregion
+    #region Types
 
     /// <summary>
     /// Represents a <see cref="TokenAccessible"/> header for a type.
@@ -132,6 +171,11 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
         /// A collection of <see cref="TokenScript"/> inputs to the <see cref="TokenScript"/>.
         /// </summary>
         public IEnumerable<TokenScriptInput> Inputs { get; set; }
+
+        /// <summary>
+        /// A collection of <see cref="TokenCommand"/>s representing the content of the <see cref="TokenScript"/> (i.e. the code that should be executed).
+        /// </summary>
+        public IEnumerable<TokenCommand> Commands { get; set; }
     }
 
     /// <summary>
@@ -149,7 +193,46 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
     /// Represents a tokenized command inside of a <see cref="TokenScript"/>, which can map (not necessarily one-to-one) to compiled <see cref="ICommand"/>s.
     /// </summary>
     public abstract class TokenCommand
+    {
+        /// <summary>
+        /// An optional <see cref="TokenPos"/> representing the location in the source code where the text representing this <see cref="TokenChild"/> occurs.
+        /// </summary>
+        public TokenPos SourcePosition { get; set; }
+    }
+
+    /// <summary>
+    /// Represents a tokenized THIS command.
+    /// </summary>
+    public class ThisTokenCommand : TokenCommand
     { }
+
+    /// <summary>
+    /// Represents an equals (=) command token (usually for the SET command).
+    /// </summary>
+    public class EqualTokenCommand : TokenCommand
+    { }
+
+    /// <summary>
+    /// Represents a tokenized reference to a path or property.
+    /// </summary>
+    public class PathTokenCommand : TokenCommand
+    {
+        /// <summary>
+        /// Represents the path of the item to retreive, set, or reference.
+        /// </summary>
+        public string Path { get; set; }
+    }
+
+    /// <summary>
+    /// Represents a tokenized EXECUTE command with the given inputs.
+    /// </summary>
+    public class ExecuteTokenCommand : TokenCommand
+    {
+        /// <summary>
+        /// The given inputs, as <see cref="TokenCommand"/>s which, when compiled, can be run to resolve input objects.
+        /// </summary>
+        public IEnumerable<TokenCommand> Inputs { get; set; }
+    }
 
     #endregion
 }

@@ -11,6 +11,6 @@ namespace BassClefStudio.DbLanguage.Tests.Parse
     [TestClass]
     public class CodeParseUnitTests
     {
-        internal PidginParseService Parser => ParserUnitTests.Parser;
+        internal PidginTypeParseService Parser => ParserUnitTests.Parser;
     }
 }
