@@ -42,9 +42,15 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
         private readonly Parser<char, string> Var = String("var");
         private readonly Parser<char, string> Return = String("return");
         private readonly Parser<char, string> This = String("this");
+        private readonly Parser<char, string> Null = String("null");
+        private readonly Parser<char, string> True = String("true"); 
+        private readonly Parser<char, string> False = String("false");
         #endregion
         #region Structures
         private Parser<char, string> String;
+        private Parser<char, int> Integer;
+        private Parser<char, double> Double;
+        private Parser<char, bool> Bool;
         private Parser<char, string> Path;
         private Parser<char, string> Name;
 
@@ -63,7 +69,14 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
                 from a in Letter
                 from b in LetterOrDigit.ManyString()
                 select string.Concat(a, b);
+
             String = AnyCharExcept('"').ManyString().Between(Quote);
+            Integer = Digit.ManyString().Select(s => int.Parse(s));
+            Double =
+                from n in Digit.ManyString()
+                from d in Dot.Then(Digit.ManyString()).Optional()
+                select double.Parse($"{n}.{d.GetValueOrDefault("0")}");
+            Bool = Try(True.ThenReturn(true)).Or(False.ThenReturn(false));
         }
 
         #endregion
@@ -77,14 +90,18 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
 
         private void InitScripts()
         {
-            //// TODO: Add all commands to parser.
+            //// TODO: Parse contextually in chunks, with understanding of when and where commands like '=', 'this', and '(inputs)' can occur in a line, and splitting lines with 'endline' tokens.
             Command = OneOf(
                 CurrentPos.Before(This).Select<TokenCommand>(p => new ThisTokenCommand() { SourcePosition = new TokenPos(p) }),
+                Map((p, v) => new LiteralTokenCommand() { SourcePosition = new TokenPos(p), Value = v } as TokenCommand, CurrentPos, String),
+                Map((p, v) => new NumberTokenCommand() { SourcePosition = new TokenPos(p), Value = v } as TokenCommand, CurrentPos, Integer),
+                Map((p, v) => new DoubleTokenCommand() { SourcePosition = new TokenPos(p), Value = v } as TokenCommand, CurrentPos, Double),
+                Map((p, v) => new BoolTokenCommand() { SourcePosition = new TokenPos(p), Value = v } as TokenCommand, CurrentPos, Bool),
+                CurrentPos.Before(Null).Select<TokenCommand>(p => new NullTokenCommand() { SourcePosition = new TokenPos(p) }),
                 Map((p, n) => new PathTokenCommand() { Path = n, SourcePosition = new TokenPos(p) } as TokenCommand, CurrentPos, Dot.Optional().Then(Name)),
                 Map((p, c) => new ExecuteTokenCommand() { SourcePosition = new TokenPos(p), Inputs = c } as TokenCommand, CurrentPos, Rec(() => Command).Separated(Comma).Between(OpenParenthesis, CloseParenthesis)),
                 CurrentPos.Before(Equal).Select<TokenCommand>(p => new EqualTokenCommand() { SourcePosition = new TokenPos(p) }),
-                CurrentPos.Before(SemiColon).Select<TokenCommand>(p => new EndLineTokenCommand() { SourcePosition = new TokenPos(p) }),
-                Map((p, v) => new LiteralTokenCommand() { SourcePosition = new TokenPos(p), Value = v } as TokenCommand, CurrentPos, String));
+                CurrentPos.Before(SemiColon).Select<TokenCommand>(p => new EndLineTokenCommand() { SourcePosition = new TokenPos(p) }));
 
             ScriptInput =
                 from p in CurrentPos

@@ -33,7 +33,7 @@ namespace BassClefStudio.DbLanguage.Tests.Parse
         [TestMethod]
         public async Task ParsePublishSingleTypeWithScript()
         {
-            string codeFile = "public type MyType { public int Test; bool RunMethod(MyType other) { this.Property.MyProperty(\"literal\"); this.Property = null; } }";
+            string codeFile = "public type MyType { public int Test; bool RunMethod(MyType other) { this.Property.MyProperty(\"literal\", 78); Property = null; } }";
             var type = Parser.ParseType(codeFile);
             TokenPackage package = new TokenPackage(null, new TokenType[] { type });
             using (var stream = new MemoryStream(2048))

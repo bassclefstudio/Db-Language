@@ -287,6 +287,8 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
         public IEnumerable<TokenCommand> Inputs { get; set; }
     }
 
+    #region Literals
+
     /// <summary>
     /// Represents a <see cref="string"/> literal.
     /// </summary>
@@ -301,5 +303,57 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
         public string Value { get; set; }
     }
 
+    /// <summary>
+    /// Represents an <see cref="int"/> literal.
+    /// </summary>
+    public class NumberTokenCommand : TokenCommand
+    {
+        /// <inheritdoc/>
+        public override string CommandType { get; } = "IVAL";
+
+        /// <summary>
+        /// The value of the number.
+        /// </summary>
+        public int Value { get; set; }
+    }
+
+    /// <summary>
+    /// Represents a <see cref="double"/> literal.
+    /// </summary>
+    public class DoubleTokenCommand : TokenCommand
+    {
+        /// <inheritdoc/>
+        public override string CommandType { get; } = "DVAL";
+
+        /// <summary>
+        /// The value of the double.
+        /// </summary>
+        public double Value { get; set; }
+    }
+
+    /// <summary>
+    /// Represents a <see cref="bool"/> literal.
+    /// </summary>
+    public class BoolTokenCommand : TokenCommand
+    {
+        /// <inheritdoc/>
+        public override string CommandType { get; } = "BVAL";
+
+        /// <summary>
+        /// The value of the boolean.
+        /// </summary>
+        public bool Value { get; set; }
+    }
+
+    /// <summary>
+    /// Represents a null literal.
+    /// </summary>
+    public class NullTokenCommand : TokenCommand
+    {
+        /// <inheritdoc/>
+        public override string CommandType { get; } = "NULL";
+    }
+
+    #endregion
     #endregion
 }
