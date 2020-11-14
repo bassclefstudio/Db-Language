@@ -87,27 +87,51 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
         private Parser<char, TokenAccessible> Script;
         private Parser<char, TokenScriptInput> ScriptInput;
         private Parser<char, IEnumerable<TokenCommand>> Commands;
-        private Parser<char, TokenCommand> BeginCommand;
         private Parser<char, TokenCommand> LiteralCommand;
+        private Parser<char, TokenCommand> ThisCommand;
+        private Parser<char, TokenCommand> ExecuteCommand;
+        private Parser<char, TokenCommand> PathCommand;
+        private Parser<char, TokenCommand> BeginCommand;
+        private Parser<char, IEnumerable<TokenCommand>> SetCommands;
+        private Parser<char, IEnumerable<TokenCommand>> CommandsValue;
 
         private void InitScripts()
         {
-            //// TODO: Parse contextually in chunks, with understanding of when and where commands like '=', 'this', and '(inputs)' can occur in a line, and splitting lines with 'endline' tokens.
-            //Command = OneOf(
-            //    CurrentPos.Before(This).Select<TokenCommand>(p => new ThisTokenCommand() { SourcePosition = new TokenPos(p) }),
-            //    Map((p, v) => new LiteralTokenCommand() { SourcePosition = new TokenPos(p), Value = v } as TokenCommand, CurrentPos, String),
-            //    Map((p, v) => new NumberTokenCommand() { SourcePosition = new TokenPos(p), Value = v } as TokenCommand, CurrentPos, Integer),
-            //    Map((p, v) => new DoubleTokenCommand() { SourcePosition = new TokenPos(p), Value = v } as TokenCommand, CurrentPos, Double),
-            //    Map((p, v) => new BoolTokenCommand() { SourcePosition = new TokenPos(p), Value = v } as TokenCommand, CurrentPos, Bool),
-            //    CurrentPos.Before(Null).Select<TokenCommand>(p => new NullTokenCommand() { SourcePosition = new TokenPos(p) }),
-            //    Map((p, n) => new PathTokenCommand() { Path = n, SourcePosition = new TokenPos(p) } as TokenCommand, CurrentPos, Dot.Optional().Then(Name)),
-            //    Map((p, c) => new ExecuteTokenCommand() { SourcePosition = new TokenPos(p), Inputs = c } as TokenCommand, CurrentPos, Rec(() => Command).Separated(Comma).Between(OpenParenthesis, CloseParenthesis)),
-            //    CurrentPos.Before(Equal).Select<TokenCommand>(p => new EqualTokenCommand() { SourcePosition = new TokenPos(p) }),
-            //    CurrentPos.Before(SemiColon).Select<TokenCommand>(p => new EndLineTokenCommand() { SourcePosition = new TokenPos(p) }));
-
-            BeginCommand = CurrentPos.Before(This).Select<TokenCommand>(p => new ThisTokenCommand() { SourcePosition = new TokenPos(p) });
             LiteralCommand = OneOf(
-                String.WithPosition().Select(v => new LiteralTokenCommand() { SourcePosition = new TokenPos(v.Item1), Value = v.Item2 } as TokenCommand));
+                String.Select<TokenCommand>(v => new LiteralTokenCommand() { Value = v }),
+                Integer.Select<TokenCommand>(v => new NumberTokenCommand() { Value = v }),
+                Double.Select<TokenCommand>(v => new DoubleTokenCommand() { Value = v }),
+                Bool.Select<TokenCommand>(v => new BoolTokenCommand() { Value = v }),
+                Null.Select<TokenCommand>(v => new NullTokenCommand())).WithPosition();
+
+            ThisCommand = This.ThenReturn<TokenCommand>(new ThisTokenCommand()).WithPosition();
+
+            ExecuteCommand = Rec(() => Commands)
+                .Separated(Comma)
+                .Between(OpenParenthesis, CloseParenthesis)
+                .Select<TokenCommand>(cs => new ExecuteTokenCommand() { Inputs = cs.SelectMany(c => c) })
+                .WithPosition();
+
+            PathCommand = Path.Select<TokenCommand>(p => new PathTokenCommand() { Path = p }).WithPosition();
+
+            BeginCommand = OneOf(
+                ThisCommand,
+                LiteralCommand,
+                PathCommand);
+
+            SetCommands = Map((i, e, o) => new IEnumerable<TokenCommand>[] { i, new TokenCommand[] { e }, o }.SelectMany(t => t),
+                Rec(() => CommandsValue),
+                Equal.ThenReturn<TokenCommand>(new EqualTokenCommand()).WithPosition(),
+                Rec(() => CommandsValue));
+
+            CommandsValue =
+                from b in BeginCommand
+                from cs in OneOf(PathCommand, ExecuteCommand).Many()
+                select new IEnumerable<TokenCommand>[] { new TokenCommand[] { b }, cs }.SelectMany(t => t);
+
+            Commands = OneOf(
+                Try(CommandsValue),
+                SetCommands);
 
             ScriptInput =
                 from p in CurrentPos
@@ -216,14 +240,19 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
         /// <summary>
         /// Creates a parser that runs the current parser and returns <typeparamref name="T3"/> as implemented interface or type <typeparamref name="T2"/>.
         /// </summary>
+        /// <param name="parser">The parser to adjust the return type of.</param>
         public static Parser<T1, T2> As<T1, T2, T3>(this Parser<T1, T3> parser) where T3 : T2
         {
             return parser.Select<T2>(p => p);
         }
 
-        public static Parser<char, Tuple<SourcePos, T>> WithPosition<T>(this Parser<char, T> parser)
+        /// <summary>
+        /// Returns a parser that takes in a <see cref="char"/> and returns a <see cref="TokenChild"/> of type <typeparamref name="T"/> with the source position set.
+        /// </summary>
+        /// <param name="parser">The parser to add position to.</param>
+        public static Parser<char, T> WithPosition<T>(this Parser<char, T> parser) where T : IPositionedToken
         {
-            return Map((p, i) => new Tuple<SourcePos, T>(p, i), CurrentPos, parser);
+            return Map((p, i) => { if (i != null) { i.SourcePosition = new TokenPos(p); } return i; }, CurrentPos, parser);
         }
     }
 }

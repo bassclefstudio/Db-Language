@@ -54,18 +54,27 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
     }
 
     /// <summary>
+    /// Represents any tokenized object which stores its position in the code file as a <see cref="TokenPos"/>.
+    /// </summary>
+    public interface IPositionedToken
+    {
+        /// <summary>
+        /// An optional <see cref="TokenPos"/> representing the location in the source code where the text representing this <see cref="TokenChild"/> occurs.
+        /// </summary>
+        TokenPos SourcePosition { get; set; }
+    }
+
+    /// <summary>
     /// Represents any named item in the Db code model.
     /// </summary>
-    public abstract class TokenChild
+    public abstract class TokenChild : IPositionedToken
     {
         /// <summary>
         /// The <see cref="string"/> name of the <see cref="TokenChild"/>.
         /// </summary>
         public string Name { get; set; }
 
-        /// <summary>
-        /// An optional <see cref="TokenPos"/> representing the location in the source code where the text representing this <see cref="TokenChild"/> occurs.
-        /// </summary>
+        /// <inheritdoc/>
         public TokenPos SourcePosition { get; set; }
     }
 
@@ -219,16 +228,14 @@ namespace BassClefStudio.DbLanguage.Compiler.Parse
     [JsonSubtypes.KnownSubType(typeof(EndLineTokenCommand), "END")]
     [JsonSubtypes.KnownSubType(typeof(ExecuteTokenCommand), "EXECUTE")]
     [JsonSubtypes.KnownSubType(typeof(LiteralTokenCommand), "SVAL")]
-    public abstract class TokenCommand
+    public abstract class TokenCommand : IPositionedToken
     {
         /// <summary>
         /// A <see cref="string"/> value indicating the type of command.
         /// </summary>
         public abstract string CommandType { get; }
 
-        /// <summary>
-        /// An optional <see cref="TokenPos"/> representing the location in the source code where the text representing this <see cref="TokenChild"/> occurs.
-        /// </summary>
+        /// <inheritdoc/>
         public TokenPos SourcePosition { get; set; }
     }
 
