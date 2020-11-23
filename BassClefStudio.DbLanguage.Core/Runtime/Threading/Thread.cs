@@ -36,11 +36,6 @@ namespace BassClefStudio.DbLanguage.Core.Runtime.Threading
         public IMemoryGroup Context { get; }
 
         /// <summary>
-        /// The memory stack is used to store the context and <see cref="DataObject"/> memory of where the thread is running as well as thread memory and scopes.
-        /// </summary>
-        public IWritableMemoryStack MemoryStack { get; private set; }
-
-        /// <summary>
         /// Creates a new <see cref="Thread"/>
         /// </summary>
         /// <param name="name">The name of the thread.</param>
@@ -78,16 +73,17 @@ namespace BassClefStudio.DbLanguage.Core.Runtime.Threading
         public async Task<DataObject> RunThreadAsync(DataObject me, IMemoryGroup inputs)
         {
             ////Initializes memory.
-            MemoryStack = new MemoryStack();
-            MemoryStack.Push(Context);
-            MemoryStack.Push(me.MemoryStack);
-            MemoryStack.Push(inputs);
-            MemoryStack.Push();
+            var defaultContext = new MemoryStack();
+            defaultContext.Push(Context);
+            defaultContext.Push(me.MemoryStack);
+            defaultContext.Push(inputs);
+            defaultContext.Push();
 
-            IMemoryGroup commandContext = null;
+            IMemoryGroup commandContext = defaultContext;
             while (!Pointer.IsStopped)
             {
-                commandContext = await Pointer.CurrentCommand.ExecuteCommandAsync(this, me, commandContext);
+                IMemoryGroup newContext = await Pointer.CurrentCommand.ExecuteCommandAsync(this, me, commandContext);
+                commandContext = newContext ?? defaultContext;
                 Pointer.Next();
             }
             return commandContext as DataObject;

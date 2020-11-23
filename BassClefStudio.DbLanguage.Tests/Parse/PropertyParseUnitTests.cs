@@ -9,20 +9,20 @@ namespace BassClefStudio.DbLanguage.Tests.Parse
     [TestClass]
     public class PropertyParseUnitTests
     {
-        internal DbParseService Parser => ParserUnitTests.Parser;
+        internal PidginTypeParseService Parser => ParserUnitTests.Parser;
 
         #region Syntax
 
-        private StringProperty CheckSingleProperty(string typeName, string propName, string visibility = "public")
+        private TokenProperty CheckSingleProperty(string typeName, string propName, string visibility = "public")
         {
             string code = $"type Blah : Parent {{ {visibility} {typeName} {propName}; }}";
-            var type = Parser.ParseClass(code);
-            var c = type.Properties.FirstOrDefault();
-            Assert.IsTrue(type.Properties.Count() == 1, "Incorrect number of children.");
-            Assert.IsTrue(c is StringProperty, "Child is not a StringProperty.");
-            StringProperty prop = c as StringProperty;
+            var type = Parser.ParseType(code);
+            var c = type.Children.FirstOrDefault();
+            Assert.IsTrue(type.Children.Count() == 1, "Incorrect number of children.");
+            Assert.IsTrue(c is TokenProperty, "Child is not a TokenProperty.");
+            TokenProperty prop = c as TokenProperty;
             Assert.IsTrue(prop.Name == propName, "Incorrect name.");
-            Assert.IsTrue(prop.Type == typeName, "Incorrect type.");
+            Assert.IsTrue(prop.ValueType == typeName, "Incorrect type.");
             return prop;
         }
 
@@ -47,7 +47,7 @@ namespace BassClefStudio.DbLanguage.Tests.Parse
         [TestMethod]
         public void InvalidNameSpacing()
         {
-            Assert.ThrowsException<ParseException>(() => Parser.ParseClass("type Blah { publicint Property; }"));
+            Assert.ThrowsException<ParseException>(() => Parser.ParseType("type Blah { publicint Property; }"));
         }
 
         [TestMethod]

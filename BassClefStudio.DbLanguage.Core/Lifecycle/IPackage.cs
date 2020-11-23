@@ -52,7 +52,7 @@ namespace BassClefStudio.DbLanguage.Core.Lifecycle
         public string Description { get; }
 
         /// <summary>
-        /// Creates a new <see cref="PackageInfo"/>
+        /// Creates a new <see cref="PackageInfo"/>.
         /// </summary>
         /// <param name="name">The full name of the given <see cref="IPackage"/>.</param>
         /// <param name="version">The version number of the <see cref="IPackage"/>, as a <see cref="VersionPath"/>.</param>
